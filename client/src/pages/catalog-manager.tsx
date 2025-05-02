@@ -63,7 +63,7 @@ export default function CatalogManager() {
   const { toast } = useToast();
 
   // Fetch catalog items
-  const { data: catalogItems, isLoading } = useQuery({
+  const { data: catalogItems, isLoading } = useQuery<CatalogItem[]>({
     queryKey: ["/api/catalog"],
   });
 
@@ -346,7 +346,7 @@ export default function CatalogManager() {
                     <div className="w-3 h-3 rounded-full bg-muted-foreground"></div>
                   </div>
                 </div>
-              ) : catalogItems && catalogItems.length > 0 ? (
+              ) : catalogItems && Array.isArray(catalogItems) && catalogItems.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -358,7 +358,7 @@ export default function CatalogManager() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {catalogItems.map((item: CatalogItem) => (
+                    {Array.isArray(catalogItems) && catalogItems.map((item: CatalogItem) => (
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell className="hidden sm:table-cell">

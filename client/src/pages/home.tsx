@@ -2,20 +2,22 @@ import { useQuery } from "@tanstack/react-query";
 import UserBalances from "@/components/UserBalances";
 import BotInterface from "@/components/BotInterface";
 import { useEffect } from "react";
+import { Link } from "wouter";
+import { User, Transaction, CatalogItem } from "@shared/schema";
 
 export default function Home() {
   // Fetch all users for the sidebar
-  const { data: users, isLoading: isLoadingUsers, error: usersError } = useQuery({
+  const { data: users, isLoading: isLoadingUsers, error: usersError } = useQuery<User[]>({
     queryKey: ['/api/users'],
   });
 
   // Fetch transactions for the transaction history
-  const { data: transactions, isLoading: isLoadingTransactions, error: transactionsError } = useQuery({
+  const { data: transactions, isLoading: isLoadingTransactions, error: transactionsError } = useQuery<Transaction[]>({
     queryKey: ['/api/transactions'],
   });
 
   // Fetch catalog items
-  const { data: catalogItems, isLoading: isLoadingCatalog, error: catalogError } = useQuery({
+  const { data: catalogItems, isLoading: isLoadingCatalog, error: catalogError } = useQuery<CatalogItem[]>({
     queryKey: ['/api/catalog'],
   });
 
@@ -44,7 +46,12 @@ export default function Home() {
           </div>
           <h1 className="text-white font-bold text-lg">MiniPoints Economy Bot</h1>
         </div>
-        <div>
+        <div className="flex items-center gap-4">
+          <Link href="/catalog">
+            <button className="px-3 py-1.5 rounded bg-primary text-xs text-white hover:bg-primary/80 transition-colors">
+              Manage Catalog
+            </button>
+          </Link>
           <span className="px-2 py-1 rounded bg-green-600 text-xs text-white">ONLINE</span>
         </div>
       </header>

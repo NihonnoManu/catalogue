@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupDiscordBot } from "./discord";
 import { z } from "zod";
-import { purchaseSchema } from "@shared/schema";
+import { purchaseSchema, insertCatalogItemSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new catalog item
   app.post(`${apiPrefix}/catalog`, async (req, res) => {
     try {
-      const data = schema.insertCatalogItemSchema.parse(req.body);
+      const data = insertCatalogItemSchema.parse(req.body);
       
       // Check if an item with the same slug already exists
       const existingItem = await storage.getCatalogItemBySlug(data.slug);
@@ -133,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Partial validation of the update data
-      const updateData = schema.insertCatalogItemSchema.partial().parse(req.body);
+      const updateData = insertCatalogItemSchema.partial().parse(req.body);
       
       const [updatedItem] = await storage.updateCatalogItem(itemId, updateData);
       res.json(updatedItem);
