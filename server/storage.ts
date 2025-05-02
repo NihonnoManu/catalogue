@@ -44,6 +44,34 @@ export const storage = {
     });
   },
   
+  async createCatalogItem(data: schema.InsertCatalogItem) {
+    return await db.insert(schema.catalogItems)
+      .values(data)
+      .returning();
+  },
+  
+  async updateCatalogItem(id: number, data: Partial<schema.InsertCatalogItem>) {
+    return await db.update(schema.catalogItems)
+      .set(data)
+      .where(eq(schema.catalogItems.id, id))
+      .returning();
+  },
+  
+  async deleteCatalogItem(id: number) {
+    // Check if there are any transactions that reference this item
+    const transactions = await db.query.transactions.findMany({
+      where: eq(schema.transactions.itemId, id)
+    });
+    
+    if (transactions.length > 0) {
+      throw new Error("Cannot delete item that has been purchased");
+    }
+    
+    return await db.delete(schema.catalogItems)
+      .where(eq(schema.catalogItems.id, id))
+      .returning();
+  },
+  
   // Transaction operations
   async createTransaction(data: schema.InsertTransaction) {
     return await db.insert(schema.transactions)

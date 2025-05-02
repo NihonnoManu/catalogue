@@ -63,6 +63,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch catalog items" });
     }
   });
+  
+  // Get catalog item by ID
+  app.get(`${apiPrefix}/catalog/:id`, async (req, res) => {
+    try {
+      const itemId = parseInt(req.params.id);
+      if (isNaN(itemId)) {
+        return res.status(400).json({ error: "Invalid item ID" });
+      }
+      
+      const item = await storage.getCatalogItemById(itemId);
+      if (!item) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+      
+      res.json(item);
+    } catch (error) {
+      console.error("Error fetching catalog item:", error);
+      res.status(500).json({ error: "Failed to fetch catalog item" });
+    }
+  });
+  
+  // Create a new catalog item
+  app.post(`${apiPrefix}/catalog`, async (req, res) => {
+    try {
+      const data = schema.insertCatalogItemSchema.parse(req.body);
+      
+      // Check if an item with the same slug already exists
+      const existingItem = await storage.getCatalogItemBySlug(data.slug);
+      if (existingItem) {
+        return res.status(400).json({ error: "An item with this slug already exists" });
+      }
+      
+      const [newItem] = await storage.createCatalogItem(data);
+      res.status(201).json(newItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Validation error",
+          details: fromZodError(error).message
+        });
+      }
+      
+      console.error("Error creating catalog item:", error);
+      res.status(500).json({ error: "Failed to create catalog item" });
+    }
+  });
+  
+  // Update a catalog item
+  app.put(`${apiPrefix}/catalog/:id`, async (req, res) => {
+    try {
+      const itemId = parseInt(req.params.id);
+      if (isNaN(itemId)) {
+        return res.status(400).json({ error: "Invalid item ID" });
+      }
+      
+      // Check if the item exists
+      const existingItem = await storage.getCatalogItemById(itemId);
+      if (!existingItem) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+      
+      // If slug is being changed, check if the new slug is already in use
+      if (req.body.slug && req.body.slug !== existingItem.slug) {
+        const itemWithSlug = await storage.getCatalogItemBySlug(req.body.slug);
+        if (itemWithSlug && itemWithSlug.id !== itemId) {
+          return res.status(400).json({ error: "An item with this slug already exists" });
+        }
+      }
+      
+      // Partial validation of the update data
+      const updateData = schema.insertCatalogItemSchema.partial().parse(req.body);
+      
+      const [updatedItem] = await storage.updateCatalogItem(itemId, updateData);
+      res.json(updatedItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Validation error",
+          details: fromZodError(error).message
+        });
+      }
+      
+      console.error("Error updating catalog item:", error);
+      res.status(500).json({ error: "Failed to update catalog item" });
+    }
+  });
+  
+  // Delete a catalog item
+  app.delete(`${apiPrefix}/catalog/:id`, async (req, res) => {
+    try {
+      const itemId = parseInt(req.params.id);
+      if (isNaN(itemId)) {
+        return res.status(400).json({ error: "Invalid item ID" });
+      }
+      
+      // Check if the item exists
+      const existingItem = await storage.getCatalogItemById(itemId);
+      if (!existingItem) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+      
+      const [deletedItem] = await storage.deleteCatalogItem(itemId);
+      res.json(deletedItem);
+    } catch (error) {
+      console.error("Error deleting catalog item:", error);
+      
+      if (error instanceof Error && error.message === "Cannot delete item that has been purchased") {
+        return res.status(400).json({ error: error.message });
+      }
+      
+      res.status(500).json({ error: "Failed to delete catalog item" });
+    }
+  });
 
   // Get recent transactions
   app.get(`${apiPrefix}/transactions`, async (req, res) => {
