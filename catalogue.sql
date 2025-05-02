@@ -1,0 +1,304 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 16.8
+-- Dumped by pg_dump version 16.5
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: catalog_items; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.catalog_items (
+    id integer NOT NULL,
+    name character varying(50) NOT NULL,
+    description text NOT NULL,
+    price integer NOT NULL,
+    slug character varying(50) NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.catalog_items OWNER TO neondb_owner;
+
+--
+-- Name: catalog_items_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+CREATE SEQUENCE public.catalog_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.catalog_items_id_seq OWNER TO neondb_owner;
+
+--
+-- Name: catalog_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: neondb_owner
+--
+
+ALTER SEQUENCE public.catalog_items_id_seq OWNED BY public.catalog_items.id;
+
+
+--
+-- Name: transactions; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.transactions (
+    id integer NOT NULL,
+    sender_id integer NOT NULL,
+    receiver_id integer NOT NULL,
+    amount integer NOT NULL,
+    item_id integer NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.transactions OWNER TO neondb_owner;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+CREATE SEQUENCE public.transactions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.transactions_id_seq OWNER TO neondb_owner;
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: neondb_owner
+--
+
+ALTER SEQUENCE public.transactions_id_seq OWNED BY public.transactions.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: neondb_owner
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
+    discord_id character varying(20) NOT NULL,
+    display_name character varying(100) NOT NULL,
+    avatar_color character varying(20) NOT NULL,
+    balance integer DEFAULT 1000 NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO neondb_owner;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: neondb_owner
+--
+
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.users_id_seq OWNER TO neondb_owner;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: neondb_owner
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: catalog_items id; Type: DEFAULT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.catalog_items ALTER COLUMN id SET DEFAULT nextval('public.catalog_items_id_seq'::regclass);
+
+
+--
+-- Name: transactions id; Type: DEFAULT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.transactions ALTER COLUMN id SET DEFAULT nextval('public.transactions_id_seq'::regclass);
+
+
+--
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Data for Name: catalog_items; Type: TABLE DATA; Schema: public; Owner: neondb_owner
+--
+
+COPY public.catalog_items (id, name, description, price, slug, created_at) FROM stdin;
+1	Coffee Run	Get coffee for both of us	150	coffee-run	2025-05-02 11:39:59.028893
+2	Movie Night	Choose the movie for our movie night	200	movie-night	2025-05-02 11:39:59.028893
+3	Dinner Takeout	Choose where we order dinner from	350	dinner-takeout	2025-05-02 11:39:59.028893
+4	Game Choice	Pick the next game we play together	250	game-choice	2025-05-02 11:39:59.028893
+\.
+
+
+--
+-- Data for Name: transactions; Type: TABLE DATA; Schema: public; Owner: neondb_owner
+--
+
+COPY public.transactions (id, sender_id, receiver_id, amount, item_id, created_at) FROM stdin;
+1	2	1	200	2	2025-05-02 11:39:59.300887
+2	1	2	150	1	2025-05-02 11:39:59.300887
+3	2	1	350	3	2025-05-02 11:39:59.300887
+4	1	2	150	1	2025-05-02 11:42:48.859585
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: neondb_owner
+--
+
+COPY public.users (id, username, password, discord_id, display_name, avatar_color, balance, created_at) FROM stdin;
+1	user1	password123	365962501688393738	Beth	bg-fuchsia-900	8	2025-05-02 11:39:58.882738
+2	user2	password123	1367611446644703333	Manu	bg-green-600	14	2025-05-02 11:39:58.882738
+\.
+
+
+--
+-- Name: catalog_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
+--
+
+SELECT pg_catalog.setval('public.catalog_items_id_seq', 4, true);
+
+
+--
+-- Name: transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
+--
+
+SELECT pg_catalog.setval('public.transactions_id_seq', 4, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: neondb_owner
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 2, true);
+
+
+--
+-- Name: catalog_items catalog_items_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.catalog_items
+    ADD CONSTRAINT catalog_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: catalog_items catalog_items_slug_unique; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.catalog_items
+    ADD CONSTRAINT catalog_items_slug_unique UNIQUE (slug);
+
+
+--
+-- Name: transactions transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT transactions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_discord_id_unique; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_discord_id_unique UNIQUE (discord_id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_username_unique; Type: CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_username_unique UNIQUE (username);
+
+
+--
+-- Name: transactions transactions_item_id_catalog_items_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT transactions_item_id_catalog_items_id_fk FOREIGN KEY (item_id) REFERENCES public.catalog_items(id);
+
+
+--
+-- Name: transactions transactions_receiver_id_users_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT transactions_receiver_id_users_id_fk FOREIGN KEY (receiver_id) REFERENCES public.users(id);
+
+
+--
+-- Name: transactions transactions_sender_id_users_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: neondb_owner
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT transactions_sender_id_users_id_fk FOREIGN KEY (sender_id) REFERENCES public.users(id);
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: public; Owner: cloud_admin
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON SEQUENCES TO neon_superuser WITH GRANT OPTION;
+
+
+--
+-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: cloud_admin
+--
+
+ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public GRANT ALL ON TABLES TO neon_superuser WITH GRANT OPTION;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
