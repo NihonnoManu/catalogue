@@ -275,6 +275,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { name: "!catalogue", description: "View items available for purchase" },
                 { name: "!buy [item]", description: "Purchase an item from the catalogue" },
                 { name: "!bargain [item] [price]", description: "Make a bargain offer for an item" },
+                { name: "!accept", description: "Accept the last bargain offer" },
+                { name: "!reject", description: "Reject the last bargain offer" },
                 { name: "!transactions", description: "View your recent transactions (last 5)" },
                 { name: "!help", description: "Display this help message" }
               ]
@@ -432,6 +434,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               content: transactionsError instanceof Error ? transactionsError.message : "Failed to fetch transactions"
             };
           }
+          break;
+
+        case "!accept":
+          response = {
+            type: "bargain_accepted",
+            content: {
+              message: "You've accepted the bargain offer. The transaction will be processed at the discounted price."
+            }
+          };
+          break;
+          
+        case "!reject":
+          response = {
+            type: "bargain_rejected",
+            content: {
+              message: "You've rejected the bargain offer. The item remains at its original price."
+            }
+          };
           break;
           
         default:
