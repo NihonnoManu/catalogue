@@ -177,10 +177,16 @@ export default function BotMessage({
               {transactions && transactions.length > 0 ? (
                 <div className="transaction-list">
                   {transactions.map((tx: any) => {
-                    const isSender = currentUser && tx.sender && tx.sender.id === currentUser.id;
+                    // Check if the current user is the sender of this transaction
+                    const isSender = currentUser && tx.senderId === currentUser.id;
+                    
+                    // Format the transaction date/time
                     const transactionDate = new Date(tx.createdAt);
                     const dateStr = transactionDate.toLocaleDateString();
                     const timeStr = transactionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    // Find the item details if it exists
+                    const itemDetails = catalogItems.find(item => item.id === tx.itemId);
                     
                     return (
                       <div key={tx.id} className="transaction-item p-2 mb-2">
@@ -190,7 +196,7 @@ export default function BotMessage({
                               {isSender ? 'Sent' : 'Received'}
                             </Badge>
                             <span className="ms-2 text-discord-text">
-                              {tx.item ? tx.item.name : 'Points Transfer'}
+                              {itemDetails ? itemDetails.name : 'Points Transfer'}
                             </span>
                           </div>
                           <span className="transaction-date small text-discord-muted">
@@ -199,8 +205,9 @@ export default function BotMessage({
                         </div>
                         <div className="d-flex justify-content-between">
                           <span className="text-discord-muted small">
-                            {isSender ? `To: ${tx.receiver ? tx.receiver.username : 'Unknown'}` : 
-                                        `From: ${tx.sender ? tx.sender.username : 'Unknown'}`}
+                            {isSender ? 
+                              `To: ${tx.receiverId === 1 ? 'user1' : 'user2'}` : 
+                              `From: ${tx.senderId === 1 ? 'user1' : 'user2'}`}
                           </span>
                           <span className={`fw-medium ${isSender ? 'text-discord-red' : 'text-discord-green'}`}>
                             {isSender ? `-${tx.amount}` : `+${tx.amount}`} MP
@@ -264,6 +271,48 @@ export default function BotMessage({
             <div className="card-body p-3">
               <h5 className="card-title text-discord-text mb-3">Bargain Rejected</h5>
               <p className="mb-0">{content.content.message}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (content.type === "all_in_success") {
+      const { message, purchase, transaction } = content.content;
+      return (
+        <div>
+          <div className="card bg-discord-secondary border-0 border-start border-4 border-discord-gold">
+            <div className="card-body p-3">
+              <h5 className="card-title text-discord-text mb-3">All Points Spent!</h5>
+              <p className="mb-3">{message}</p>
+              
+              {purchase && (
+                <div className="mb-3 p-2 rounded bg-discord-tertiary">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                    <span className="fw-medium">{purchase.item.name}</span>
+                    {purchase.paidPrice > purchase.originalPrice && (
+                      <Badge variant="secondary" className="ml-2">
+                        Extra {purchase.paidPrice - purchase.originalPrice} points!
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="d-flex flex-wrap justify-content-between text-muted small">
+                    <span>Original: {purchase.originalPrice} minipoints</span>
+                    <span>→</span>
+                    <span className="text-discord-gold fw-medium">Paid: {purchase.paidPrice} minipoints</span>
+                  </div>
+                  <div className="d-flex justify-content-between mt-2">
+                    <span className="text-discord-muted small">To: {purchase.recipient}</span>
+                    <span className="text-discord-red fw-medium">Balance: {purchase.newBalance}</span>
+                  </div>
+                </div>
+              )}
+              
+              {transaction && (
+                <div className="small text-muted mt-2">
+                  Transaction ID: {transaction.id}
+                </div>
+              )}
             </div>
           </div>
         </div>
