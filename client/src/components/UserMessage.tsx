@@ -6,8 +6,11 @@ interface UserMessageProps {
 
 export default function UserMessage({ content }: UserMessageProps) {
   return (
-    <div className="flex mb-4 justify-end">
-      <div className="bg-accent rounded-lg p-3 max-w-lg">
+    <div className="message message-user">
+      <div className="message-avatar" style={{backgroundColor: '#ED4245'}}>
+        <span>U</span>
+      </div>
+      <div className="message-content">
         <p>{content}</p>
       </div>
     </div>

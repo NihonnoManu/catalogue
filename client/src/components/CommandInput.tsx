@@ -45,56 +45,59 @@ export default function CommandInput({
   };
 
   return (
-    <div className="p-4 border-t border-black/20 bg-sidebar">
+    <div className="command-input">
       {users.length > 0 && (
-        <div className="mb-3">
-          <Select
-            value={activeUser?.id.toString() || ""}
-            onValueChange={handleUserChange}
-            disabled={isLoading}
-          >
-            <SelectTrigger className="w-full bg-background border-none">
-              <SelectValue placeholder="Select a user" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Active User</SelectLabel>
-                {users.map(user => (
-                  <SelectItem key={user.id} value={user.id.toString()}>
-                    {user.displayName}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="user-list d-flex gap-2 mb-0">
+            {users.map(user => (
+              <div 
+                key={user.id} 
+                className={`user-item py-2 px-3 rounded ${activeUser?.id === user.id ? 'active' : ''}`}
+                onClick={() => handleUserChange(user.id.toString())}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="user-avatar" style={{ 
+                  backgroundColor: user.id === 1 ? '#5865F2' : '#ED4245',
+                  width: '32px',
+                  height: '32px',
+                  fontSize: '14px'
+                }}>
+                  {user.displayName.charAt(0).toUpperCase()}
+                </div>
+                <div className="user-info ms-2">
+                  <div className="user-name">{user.displayName}</div>
+                  <div className="user-balance">{user.balance} points</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="flex">
-        <Input
+      <form onSubmit={handleSubmit} className="input-wrapper">
+        <input
           type="text"
           value={command}
           onChange={(e) => setCommand(e.target.value)}
           placeholder="Type a command (!help, !balance, !catalogue, !buy [item])"
-          className="flex-1 rounded-l-md bg-background border-none outline-none text-foreground p-3"
           disabled={isLoading || !activeUser}
           aria-label="Command input"
         />
-        <Button
+        <button
           type="submit"
-          variant="default"
-          className="bg-primary text-white px-4 rounded-r-md hover:bg-opacity-80 transition-colors"
+          className="send-button"
           disabled={isLoading || !command.trim() || !activeUser}
         >
           {isLoading ? (
-            <span className="flex items-center">
-              <span className="animate-spin mr-1">&#9696;</span> 
-              Processing
-            </span>
+            <div className="spinner-border spinner-border-sm text-discord-blurple" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           ) : (
-            "Send"
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor" />
+            </svg>
           )}
-        </Button>
+        </button>
       </form>
     </div>
   );

@@ -125,11 +125,11 @@ export default function BotInterface({ users, catalogItems, isLoading }: BotInte
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="chat-container h-100">
       {/* Bot messages and user interactions */}
       <div 
         ref={chatAreaRef}
-        className="flex-1 p-4 overflow-y-auto"
+        className="chat-messages"
         id="chat-area"
       >
         {messages.map((message) => (
@@ -151,11 +151,9 @@ export default function BotInterface({ users, catalogItems, isLoading }: BotInte
         ))}
         
         {commandMutation.isPending && (
-          <div className="flex items-center justify-center my-4">
-            <div className="animate-pulse flex space-x-2">
-              <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
-              <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
-              <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
+          <div className="d-flex align-items-center justify-content-center my-4">
+            <div className="spinner-border spinner-border-sm text-discord-muted" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
           </div>
         )}
