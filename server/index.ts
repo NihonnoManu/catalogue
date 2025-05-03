@@ -1,14 +1,15 @@
-import dotenv from 'dotenv';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import dotenv from 'dotenv';
 
 
 // Load environment variables from .env file
 dotenv.config();
 
-require('dotenv').config()
-console.log(process.env) // remove this after you've confirmed it is working
+//console.log("hola");
+//console.log(process.env) // remove this after you've confirmed it is working
+//console.log("Adios")
 
 const app = express();
 app.use(express.json());
