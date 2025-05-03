@@ -3,8 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupDiscordBot } from "./discord";
 import { z } from "zod";
-import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema } from "@shared/schema";
+import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema, users, transactions } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import { eq } from "drizzle-orm";
+import { db } from "@db";
 
 // Store active bargain offers by userId
 type BargainOffer = {
@@ -553,57 +555,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
           
         case "!all-in":
-          if (commandParts.length < 2) {
-            response = {
-              type: "error",
-              content: "Please specify an item to spend all your points on (e.g., !all-in coffee-run)"
-            };
-            break;
-          }
-          
-          const allInItemSlug = commandParts[1].toLowerCase();
-          
           try {
-            // First check if the item exists
-            const allInItem = await storage.getCatalogItemBySlug(allInItemSlug);
-            if (!allInItem) {
-              response = {
-                type: "error",
-                content: `Item '${allInItemSlug}' not found in catalog`
-              };
-              break;
-            }
-            
             // Check if user has any balance at all
             if (user.balance <= 0) {
               response = {
                 type: "error",
-                content: "You don't have any points to spend."
+                content: "You don't have any points to transfer."
               };
               break;
             }
             
-            // Process the purchase using the user's entire balance as the price
-            const purchaseResult = await storage.purchaseItem(user.id, allInItemSlug, user.balance);
+            // Find the other user who will receive the points
+            const users = await storage.getAllUsers();
+            const receiver = users.find(u => u.id !== user.id);
+            if (!receiver) {
+              response = {
+                type: "error",
+                content: "Could not find another user to transfer points to."
+              };
+              break;
+            }
             
+            // Start a transaction to ensure data consistency
+            const transferResult = await db.transaction(async (tx) => {
+              // Update sender's balance to 0
+              await tx.update(users)
+                .set({ balance: 0 })
+                .where(eq(users.id, user.id));
+              
+              // Update receiver's balance by adding the sender's balance
+              const newReceiverBalance = receiver.balance + user.balance;
+              await tx.update(users)
+                .set({ balance: newReceiverBalance })
+                .where(eq(users.id, receiver.id));
+              
+              // Create a transaction record (no itemId for direct transfers)
+              const [transaction] = await tx.insert(transactions)
+                .values({
+                  senderId: user.id,
+                  receiverId: receiver.id,
+                  amount: user.balance,
+                  itemId: null // Direct transfer, no item involved
+                })
+                .returning();
+              
+              return {
+                transaction,
+                sender: {
+                  ...user,
+                  balance: 0
+                },
+                receiver: {
+                  ...receiver,
+                  balance: newReceiverBalance
+                },
+                transferredAmount: user.balance
+              };
+            });
+            
+            // Build the response
             response = {
               type: "all_in_success",
               content: {
-                message: `You've spent all your ${user.balance} points on ${allInItem.name}!`,
-                purchase: {
-                  item: allInItem,
-                  originalPrice: allInItem.price,
-                  paidPrice: user.balance,
-                  newBalance: 0,
-                  recipient: purchaseResult.receiver.username
+                message: `You've transferred all your ${transferResult.transferredAmount} points to ${receiver.username}!`,
+                transfer: {
+                  amount: transferResult.transferredAmount,
+                  newSenderBalance: 0,
+                  receiver: receiver.username
                 },
-                transaction: purchaseResult.transaction
+                transaction: transferResult.transaction
               }
             };
           } catch (allInError) {
             response = {
               type: "error",
-              content: allInError instanceof Error ? allInError.message : "Failed to process all-in purchase"
+              content: allInError instanceof Error ? allInError.message : "Failed to process all-in transfer"
             };
           }
           break;

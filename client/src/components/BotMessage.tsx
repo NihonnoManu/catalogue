@@ -278,14 +278,15 @@ export default function BotMessage({
     }
     
     if (content.type === "all_in_success") {
-      const { message, purchase, transaction } = content.content;
+      const { message, purchase, transfer, transaction } = content.content;
       return (
         <div>
           <div className="card bg-discord-secondary border-0 border-start border-4 border-discord-gold">
             <div className="card-body p-3">
-              <h5 className="card-title text-discord-text mb-3">All Points Spent!</h5>
+              <h5 className="card-title text-discord-text mb-3">All Points Transferred!</h5>
               <p className="mb-3">{message}</p>
               
+              {/* For item purchases (legacy format) */}
               {purchase && (
                 <div className="mb-3 p-2 rounded bg-discord-tertiary">
                   <div className="d-flex flex-wrap justify-content-between align-items-center mb-2">
@@ -304,6 +305,26 @@ export default function BotMessage({
                   <div className="d-flex justify-content-between mt-2">
                     <span className="text-discord-muted small">To: {purchase.recipient}</span>
                     <span className="text-discord-red fw-medium">Balance: {purchase.newBalance}</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* For direct transfers (new format) */}
+              {transfer && (
+                <div className="mb-3 p-2 rounded bg-discord-tertiary">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span className="fw-medium">Direct Transfer</span>
+                    <Badge variant="secondary" className="ml-2 bg-discord-gold text-white">
+                      All-in!  
+                    </Badge>
+                  </div>
+                  <div className="d-flex flex-wrap justify-content-between text-muted small">
+                    <span className="text-discord-gold fw-medium">Amount: {transfer.amount} minipoints</span>
+                    <span>→</span>
+                    <span className="text-discord-muted">To: {transfer.receiver}</span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="text-discord-red fw-medium">New Balance: {transfer.newSenderBalance}</span>
                   </div>
                 </div>
               )}
