@@ -286,6 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { name: "!bargain [item] [price]", description: "Make a bargain offer for an item" },
                 { name: "!accept", description: "Accept the last bargain offer" },
                 { name: "!reject", description: "Reject the last bargain offer" },
+                { name: "!all-in [item]", description: "Spend all your points on an item" },
                 { name: "!transactions", description: "View your recent transactions (last 5)" },
                 { name: "!help", description: "Display this help message" }
               ]
@@ -547,6 +548,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
             response = {
               type: "error",
               content: rejectError instanceof Error ? rejectError.message : "Failed to process the bargain rejection"
+            };
+          }
+          break;
+          
+        case "!all-in":
+          if (commandParts.length < 2) {
+            response = {
+              type: "error",
+              content: "Please specify an item to spend all your points on (e.g., !all-in coffee-run)"
+            };
+            break;
+          }
+          
+          const allInItemSlug = commandParts[1].toLowerCase();
+          
+          try {
+            // First check if the item exists
+            const allInItem = await storage.getCatalogItemBySlug(allInItemSlug);
+            if (!allInItem) {
+              response = {
+                type: "error",
+                content: `Item '${allInItemSlug}' not found in catalog`
+              };
+              break;
+            }
+            
+            // Check if user has any balance at all
+            if (user.balance <= 0) {
+              response = {
+                type: "error",
+                content: "You don't have any points to spend."
+              };
+              break;
+            }
+            
+            // Process the purchase using the user's entire balance as the price
+            const purchaseResult = await storage.purchaseItem(user.id, allInItemSlug, user.balance);
+            
+            response = {
+              type: "all_in_success",
+              content: {
+                message: `You've spent all your ${user.balance} points on ${allInItem.name}!`,
+                purchase: {
+                  item: allInItem,
+                  originalPrice: allInItem.price,
+                  paidPrice: user.balance,
+                  newBalance: 0,
+                  recipient: purchaseResult.receiver.username
+                },
+                transaction: purchaseResult.transaction
+              }
+            };
+          } catch (allInError) {
+            response = {
+              type: "error",
+              content: allInError instanceof Error ? allInError.message : "Failed to process all-in purchase"
             };
           }
           break;

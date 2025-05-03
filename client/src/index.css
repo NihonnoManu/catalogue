@@ -12,6 +12,7 @@
   --discord-border: #42464d;
   --discord-green: #3ba55c;
   --discord-purple: #7289da; /* Discord purple for bargain messages */
+  --discord-gold: #ffb300; /* Discord gold for all-in messages */
   --discord-main: #36393f; /* Discord main content area */
   
   /* Sidebar colors */
@@ -143,8 +144,44 @@ body {
   color: var(--discord-muted) !important;
 }
 
+.text-discord-text {
+  color: var(--discord-text) !important;
+}
+
+.text-discord-red {
+  color: var(--discord-red) !important;
+}
+
+.text-discord-green {
+  color: var(--discord-green) !important;
+}
+
+.text-discord-purple {
+  color: var(--discord-purple) !important;
+}
+
+.text-discord-gold {
+  color: var(--discord-gold) !important;
+}
+
 .border-discord {
   border-color: var(--discord-border) !important;
+}
+
+.border-discord-green {
+  border-color: var(--discord-green) !important;
+}
+
+.border-discord-red {
+  border-color: var(--discord-red) !important;
+}
+
+.border-discord-purple {
+  border-color: var(--discord-purple) !important;
+}
+
+.border-discord-gold {
+  border-color: var(--discord-gold) !important;
 }
 
 .bg-discord-card {
@@ -153,6 +190,30 @@ body {
 
 .bg-discord-secondary {
   background-color: var(--discord-secondary);
+}
+
+.bg-discord-tertiary {
+  background-color: var(--discord-accent);
+}
+
+.bg-discord-blurple {
+  background-color: var(--discord-blurple);
+}
+
+.bg-discord-green {
+  background-color: var(--discord-green);
+}
+
+.bg-discord-red {
+  background-color: var(--discord-red);
+}
+
+.bg-discord-purple {
+  background-color: var(--discord-purple);
+}
+
+.bg-discord-gold {
+  background-color: var(--discord-gold);
 }
 
 .online-badge {
