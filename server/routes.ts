@@ -576,21 +576,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
             
-            // Use a manually handled transaction
-            // 1. Update the receiver balance
-            const newReceiverBalance = receiver.balance + user.balance;
-            await storage.updateUserBalance(receiver.id, newReceiverBalance);
-            
-            // 2. Create a transaction record
-            const transaction = await storage.createTransaction({
-              senderId: user.id,
-              receiverId: receiver.id,
-              amount: user.balance,
-              itemId: 0 // Direct transfer, no item involved, using 0 as placeholder (since null not allowed)
+            // Start a database transaction for consistency
+            const transferResult = await db.transaction(async (tx) => {
+              // 1. Update the receiver balance
+              const newReceiverBalance = receiver.balance + user.balance;
+              await tx.update(users)
+                .set({ balance: newReceiverBalance })
+                .where(eq(users.id, receiver.id));
+              
+              // 2. Create a transaction record
+              // Use a raw insert to bypass the validation that would require an itemId
+              const [transaction] = await tx.insert(transactions)
+                .values({
+                  senderId: user.id,
+                  receiverId: receiver.id,
+                  amount: user.balance,
+                  // Omit itemId entirely
+                })
+                .returning();
+              
+              // 3. Update the sender's balance (set to 0)
+              await tx.update(users)
+                .set({ balance: 0 })
+                .where(eq(users.id, user.id));
+                
+              return {
+                transaction,
+                receiverBalance: newReceiverBalance
+              };
             });
-            
-            // 3. Update the sender's balance (set to 0)
-            await storage.updateUserBalance(user.id, 0);
             
             // Get updated user info
             const updatedUser = await storage.getUserById(user.id);
@@ -605,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   newSenderBalance: 0,
                   receiver: receiver.username
                 },
-                transaction: transaction
+                transaction: transferResult.transaction
               }
             };
           } catch (allInError) {

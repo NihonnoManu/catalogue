@@ -50,15 +50,19 @@ export const transactions = pgTable("transactions", {
   senderId: integer("sender_id").references(() => users.id).notNull(),
   receiverId: integer("receiver_id").references(() => users.id).notNull(),
   amount: integer("amount").notNull(),
-  itemId: integer("item_id").references(() => catalogItems.id).notNull(),
+  itemId: integer("item_id").references(() => catalogItems.id), // Made optional for direct transfers
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
 export const insertTransactionSchema = createInsertSchema(transactions, {
   senderId: (schema) => schema.positive("Sender ID must be positive"),
   receiverId: (schema) => schema.positive("Receiver ID must be positive"),
-  amount: (schema) => schema.gt(0, "Amount must be greater than 0"),
-  itemId: (schema) => schema.positive("Item ID must be positive")
+  amount: (schema) => schema.gt(0, "Amount must be greater than 0")
+});
+
+// Add additional validation for optional itemId
+export const insertTransactionSchemaWithValidation = insertTransactionSchema.extend({
+  itemId: z.number().positive("Item ID must be positive").optional()
 });
 
 export type Transaction = typeof transactions.$inferSelect;
