@@ -246,8 +246,8 @@ export default function BotMessage({
                     </Badge>
                   </div>
                   <div className="d-flex flex-wrap justify-content-between text-muted small">
-                    <span>Original: {bargain.originalPrice} minipoints</span>
-                    <span>→</span>
+                    <span className="text-success">Original: {bargain.originalPrice} minipoints</span>
+                    <span className="text-success">→</span>
                     <span className="text-success fw-medium">Agreed: {bargain.agreedPrice} minipoints</span>
                   </div>
                 </div>
@@ -255,7 +255,7 @@ export default function BotMessage({
               
               {transaction && (
                 <div className="small text-muted mt-2">
-                  Transaction ID: {transaction.id}
+                  //Transaction ID: {transaction.id}
                 </div>
               )}
             </div>
@@ -320,7 +320,7 @@ export default function BotMessage({
                   </div>
                   <div className="d-flex flex-wrap justify-content-between text-muted small">
                     <span className="text-discord-gold fw-medium">Amount: {transfer.amount} minipoints</span>
-                    <span>→</span>
+                    <span className="text-discord-gold">→</span>
                     <span className="text-discord-muted">To: {transfer.receiver}</span>
                   </div>
                   <div className="mt-2">
@@ -331,7 +331,7 @@ export default function BotMessage({
               
               {transaction && (
                 <div className="small text-muted mt-2">
-                  Transaction ID: {transaction.id}
+                 // Transaction ID: {transaction.id}
                 </div>
               )}
             </div>
