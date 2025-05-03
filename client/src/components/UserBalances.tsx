@@ -1,6 +1,6 @@
 import UserBalance from "./UserBalance";
 import TransactionHistory from "./TransactionHistory";
-import { User, Transaction } from "@shared/schema";
+import { User, Transaction, CatalogItem } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface UserBalancesProps {
@@ -10,7 +10,7 @@ interface UserBalancesProps {
   catalogItems?: CatalogItem[];
 }
 
-export default function UserBalances({ users, transactions, isLoading }: UserBalancesProps) {
+export default function UserBalances({ users, transactions, isLoading, catalogItems }: UserBalancesProps) {
   return (
     <div className="w-100">
       {isLoading ? (
@@ -45,7 +45,8 @@ export default function UserBalances({ users, transactions, isLoading }: UserBal
       <TransactionHistory 
         transactions={transactions}
         users={users} 
-        isLoading={isLoading} 
+        isLoading={isLoading}
+        catalogItems={catalogItems}
       />
     </div>
   );
