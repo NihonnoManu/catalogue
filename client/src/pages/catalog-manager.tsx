@@ -205,19 +205,19 @@ export default function CatalogManager() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="flex gap-md" style={{flexDirection: 'column'}}>
         {/* Item Form */}
-        <div className="md:col-span-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{isEditing ? "Edit Item" : "Add New Item"}</CardTitle>
-              <CardDescription>
+        <div>
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">{isEditing ? "Edit Item" : "Add New Item"}</div>
+              <p className="card-description text-muted">
                 {isEditing
                   ? "Edit the catalog item details"
                   : "Fill out the form to add a new item to the catalog"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </p>
+            </div>
+            <div className="p-md">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -303,15 +303,16 @@ export default function CatalogManager() {
 
                   <div className="flex justify-end space-x-2 pt-2">
                     {isEditing && (
-                      <Button
-                        variant="outline"
+                      <button
+                        className="btn btn-secondary"
                         type="button"
                         onClick={handleCancelEdit}
                       >
                         Cancel
-                      </Button>
+                      </button>
                     )}
-                    <Button
+                    <button
+                      className="btn btn-primary"
                       type="submit"
                       disabled={
                         createMutation.isPending ||
@@ -320,103 +321,104 @@ export default function CatalogManager() {
                       }
                     >
                       {isEditing ? "Update" : "Add"} Item
-                    </Button>
+                    </button>
                   </div>
                 </form>
               </Form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Item List */}
-        <div className="md:col-span-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Catalog Items</CardTitle>
-              <CardDescription>
+        <div>
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">Catalog Items</div>
+              <p className="card-description text-muted">
                 Manage your existing catalog items here.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </p>
+            </div>
+            <div className="p-md">
               {isLoading ? (
-                <div className="flex items-center justify-center h-40">
-                  <div className="animate-pulse flex space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-muted-foreground"></div>
-                    <div className="w-3 h-3 rounded-full bg-muted-foreground"></div>
-                    <div className="w-3 h-3 rounded-full bg-muted-foreground"></div>
+                <div className="flex items-center justify-center" style={{height: '10rem'}}>
+                  <div className="flex gap-sm">
+                    <div style={{width: '0.75rem', height: '0.75rem'}} className="rounded-full bg-muted"></div>
+                    <div style={{width: '0.75rem', height: '0.75rem'}} className="rounded-full bg-muted"></div>
+                    <div style={{width: '0.75rem', height: '0.75rem'}} className="rounded-full bg-muted"></div>
                   </div>
                 </div>
               ) : catalogItems && Array.isArray(catalogItems) && catalogItems.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="hidden sm:table-cell">Description</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead className="hidden sm:table-cell">Slug</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Array.isArray(catalogItems) && catalogItems.map((item: CatalogItem) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell className="hidden sm:table-cell">
-                          {item.description.length > 30
-                            ? `${item.description.substring(0, 30)}...`
-                            : item.description}
-                        </TableCell>
-                        <TableCell>{item.price} pts</TableCell>
-                        <TableCell className="hidden sm:table-cell">{item.slug}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(item)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Are you sure you want to delete this item?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone if the item has no
-                                  purchase history. Items that have been purchased
-                                  cannot be deleted.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteMutation.mutate(item.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="table">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Slug</th>
+                        <th style={{textAlign: 'right'}}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(catalogItems) && catalogItems.map((item: CatalogItem) => (
+                        <tr key={item.id}>
+                          <td className="font-bold">{item.name}</td>
+                          <td>
+                            {item.description.length > 30
+                              ? `${item.description.substring(0, 30)}...`
+                              : item.description}
+                          </td>
+                          <td>{item.price} pts</td>
+                          <td>{item.slug}</td>
+                          <td style={{textAlign: 'right'}}>
+                            <button
+                              className="btn btn-secondary"
+                              onClick={() => handleEdit(item)}
+                            >
+                              <Pencil style={{height: '1rem', width: '1rem'}} />
+                            </button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button className="btn btn-secondary">
+                                  <Trash style={{height: '1rem', width: '1rem'}} />
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Are you sure you want to delete this item?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone if the item has no
+                                    purchase history. Items that have been purchased
+                                    cannot be deleted.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteMutation.mutate(item.id)}
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                <div className="text-center py-10">
-                  <p className="text-muted-foreground">
+                <div className="text-center py-md">
+                  <p className="text-muted">
                     No catalog items found. Add your first item using the form.
                   </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
