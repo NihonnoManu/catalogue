@@ -99,6 +99,12 @@ export default function Home() {
                 <span className="text-discord-text"># !bargain [item] [price]</span>
               </div>
               <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !accept</span>
+              </div>
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !reject</span>
+              </div>
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
                 <span className="text-discord-text"># !transactions</span>
               </div>
             </div>

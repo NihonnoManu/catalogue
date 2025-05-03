@@ -49,6 +49,8 @@ export default function BotInterface({ users, catalogItems, isLoading }: BotInte
                 { name: "!catalogue", description: "View items available for purchase" },
                 { name: "!buy [item]", description: "Purchase an item from the catalogue" },
                 { name: "!bargain [item] [price]", description: "Make a bargain offer for an item" },
+                { name: "!accept", description: "Accept the last bargain offer" },
+                { name: "!reject", description: "Reject the last bargain offer" },
                 { name: "!transactions", description: "View your recent transactions (last 5)" },
                 { name: "!help", description: "Display this help message" }
               ]
@@ -63,7 +65,11 @@ export default function BotInterface({ users, catalogItems, isLoading }: BotInte
   // Scroll to bottom when messages change
   useEffect(() => {
     if (chatAreaRef.current) {
-      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+      setTimeout(() => {
+        if (chatAreaRef.current) {
+          chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+        }
+      }, 100); // Small delay to ensure content is rendered
     }
   }, [messages]);
 

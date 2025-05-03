@@ -220,6 +220,32 @@ export default function BotMessage({
         </div>
       );
     }
+
+    if (content.type === "bargain_accepted") {
+      return (
+        <div>
+          <div className="card bg-discord-secondary border-0 border-start border-4 border-discord-green">
+            <div className="card-body p-3">
+              <h5 className="card-title text-discord-text mb-3">Bargain Accepted</h5>
+              <p className="mb-0">{content.content.message}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (content.type === "bargain_rejected") {
+      return (
+        <div>
+          <div className="card bg-discord-secondary border-0 border-start border-4 border-discord-red">
+            <div className="card-body p-3">
+              <h5 className="card-title text-discord-text mb-3">Bargain Rejected</h5>
+              <p className="mb-0">{content.content.message}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
     
     // Default case for unknown content
     return <p>{JSON.stringify(content)}</p>;

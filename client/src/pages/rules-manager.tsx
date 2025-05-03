@@ -53,8 +53,6 @@ import { Pencil, Trash, Plus, ArrowLeft } from "lucide-react";
 type FormData = {
   name: string;
   description: string;
-  type: string;
-  parameters: string;
 };
 
 export default function RulesManager() {
@@ -75,9 +73,7 @@ export default function RulesManager() {
     resolver: zodResolver(insertRuleSchema),
     defaultValues: {
       name: "",
-      description: "",
-      type: "bargain",
-      parameters: JSON.stringify({ discountPercentage: 10 }),
+      description: ""
     },
   });
 
@@ -179,21 +175,17 @@ export default function RulesManager() {
 
   // Form submission handler
   const onSubmit = (data: FormData) => {
-    try {
-      // Validate parameters as JSON
-      JSON.parse(data.parameters);
+    // Add default type and parameters
+    const enhancedData = {
+      ...data,
+      type: "bargain",
+      parameters: JSON.stringify({ discountPercentage: 10 })
+    };
 
-      if (isEditing && currentRuleId) {
-        updateMutation.mutate({ ...data, id: currentRuleId });
-      } else {
-        createMutation.mutate(data);
-      }
-    } catch (e) {
-      toast({
-        title: "Error",
-        description: "Parameters must be valid JSON",
-        variant: "destructive",
-      });
+    if (isEditing && currentRuleId) {
+      updateMutation.mutate({ ...enhancedData, id: currentRuleId });
+    } else {
+      createMutation.mutate(enhancedData);
     }
   };
 
@@ -283,47 +275,7 @@ export default function RulesManager() {
                     />
                   </div>
 
-                  <div className="mb-3">
-                    <FormField
-                      control={form.control}
-                      name="type"
-                      render={({ field }) => (
-                        <div className="form-group">
-                          <label className="form-label text-discord-text">Rule Type</label>
-                          <select 
-                            className="form-select" 
-                            style={{ backgroundColor: 'var(--discord-input)', color: 'var(--discord-text)', borderColor: 'var(--discord-border)' }}
-                            {...field}
-                          >
-                            <option value="bargain">Bargain</option>
-                            <option value="discount">Discount</option>
-                          </select>
-                          <FormMessage />
-                        </div>
-                      )}
-                    />
-                  </div>
-
-                  <div className="mb-3">
-                    <FormField
-                      control={form.control}
-                      name="parameters"
-                      render={({ field }) => (
-                        <div className="form-group">
-                          <label className="form-label text-discord-text">Parameters (JSON format)</label>
-                          <textarea 
-                            className="form-control" 
-                            style={{ backgroundColor: 'var(--discord-input)', color: 'var(--discord-text)', borderColor: 'var(--discord-border)' }}
-                            placeholder='{ "discountPercentage": 10 }' 
-                            rows={3}
-                            {...field}
-                          />
-                          <div className="form-text text-discord-muted small">Enter parameters in valid JSON format</div>
-                          <FormMessage />
-                        </div>
-                      )}
-                    />
-                  </div>
+                  {/* Type and parameters are set automatically by the backend */}
 
                   <div className="d-flex justify-content-end gap-2 mt-4">
                     {isEditing && (
