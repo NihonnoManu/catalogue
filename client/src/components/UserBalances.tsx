@@ -11,39 +11,35 @@ interface UserBalancesProps {
 
 export default function UserBalances({ users, transactions, isLoading }: UserBalancesProps) {
   return (
-    <div className="w-64 bg-sidebar p-4 flex flex-col border-r border-black/20">
-      <h2 className="text-sm uppercase tracking-wide font-semibold text-muted-foreground mb-4">User Balances</h2>
-      
+    <div className="w-100">
       {isLoading ? (
         <>
-          <div className="mb-4 p-3 rounded bg-background">
-            <div className="flex items-center space-x-2 mb-2">
-              <Skeleton className="w-8 h-8 rounded-full" />
-              <Skeleton className="h-5 w-20" />
-            </div>
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-16" />
-            </div>
-          </div>
-          <div className="mb-4 p-3 rounded bg-background">
-            <div className="flex items-center space-x-2 mb-2">
-              <Skeleton className="w-8 h-8 rounded-full" />
-              <Skeleton className="h-5 w-20" />
-            </div>
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-16" />
+          <div className="mb-3 p-3 rounded bg-discord-secondary">
+            <div className="d-flex align-items-center gap-2 mb-2">
+              <div className="spinner-border spinner-border-sm text-discord-muted" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <div className="text-discord-muted">Loading users...</div>
             </div>
           </div>
         </>
       ) : (
         users.map((user) => (
-          <UserBalance key={user.id} user={user} />
+          <div key={user.id} className="user-item mb-2">
+            <div className="user-avatar" style={{
+              backgroundColor: user.id === 1 ? '#5865F2' : '#ED4245', 
+            }}>
+              {user.displayName.charAt(0).toUpperCase()}
+            </div>
+            <div className="user-info">
+              <div className="user-name">{user.displayName}</div>
+              <div className="user-balance">{user.balance} points</div>
+            </div>
+          </div>
         ))
       )}
 
-      <h2 className="text-sm uppercase tracking-wide font-semibold text-muted-foreground mt-4 mb-3">Recent Transactions</h2>
+      <h6 className="text-discord-muted text-uppercase fw-bold mt-4 mb-3 fs-7">Recent Transactions</h6>
       
       <TransactionHistory 
         transactions={transactions}

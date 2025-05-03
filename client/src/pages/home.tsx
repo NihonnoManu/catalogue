@@ -37,44 +37,93 @@ export default function Home() {
   const isLoading = isLoadingUsers || isLoadingTransactions || isLoadingCatalog;
 
   return (
-    <div className="min-vh-100 d-flex flex-column">
+    <div className="vh-100 d-flex flex-column">
       {/* Header Bar */}
-      <header className="navbar-discord py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
-        <div className="d-flex align-items-center gap-2">
-          <div className="d-flex align-items-center justify-content-center rounded-circle p-2" 
-               style={{ width: '40px', height: '40px', backgroundColor: 'var(--discord-blurple)' }}>
-            <i className="fas fa-robot text-white"></i>
+      <header className="navbar py-2 px-3 border-bottom border-discord-border" style={{backgroundColor: '#202225'}}>
+        <div className="container-fluid d-flex align-items-center justify-content-between px-0">
+          <div className="d-flex align-items-center gap-2">
+            <div className="d-flex align-items-center justify-content-center rounded-circle" 
+                style={{ width: '32px', height: '32px', backgroundColor: 'var(--discord-blurple)' }}>
+              <span className="text-white fw-bold">M</span>
+            </div>
+            <h1 className="fw-bold fs-5 text-discord-text mb-0">MiniPoints Economy</h1>
           </div>
-          <h1 className="fw-bold fs-4 text-white mb-0">MiniPoints Economy Bot</h1>
-        </div>
-        <div className="d-flex align-items-center gap-3">
-          <Link href="/catalog">
-            <button className="btn btn-discord-primary btn-sm">
-              <i className="fas fa-cog me-1"></i> Manage Catalog
-            </button>
-          </Link>
-          <span className="online-badge">ONLINE</span>
+          <div className="d-flex align-items-center gap-3">
+            <Link href="/catalog-manager">
+              <button className="btn btn-discord-secondary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                Manage Catalog
+              </button>
+            </Link>
+            <div className="badge bg-discord-green text-white px-2 py-1 rounded-pill">ONLINE</div>
+          </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* Main Content Area with Discord-style layout */}
       <div className="d-flex flex-grow-1 overflow-hidden">
-        {/* Left Sidebar - User Balances */}
-        <div className="sidebar-discord p-3" style={{ width: '300px' }}>
-          <UserBalances 
-            users={users || []}
-            transactions={transactions || []}
-            isLoading={isLoading}
-          />
+        {/* Server List - Narrow left sidebar */}
+        <div style={{width: '72px', backgroundColor: '#1e1f22', flexShrink: 0}} className="py-3 d-flex flex-column align-items-center">
+          <div className="d-flex align-items-center justify-content-center rounded-circle mb-3" 
+              style={{ width: '48px', height: '48px', backgroundColor: 'var(--discord-blurple)' }}>
+            <span className="text-white fw-bold">M</span>
+          </div>
+          <div className="border-bottom border-discord-border w-50 mb-3"></div>
+          <div className="d-flex align-items-center justify-content-center rounded-circle mb-2" 
+              style={{ width: '48px', height: '48px', backgroundColor: 'var(--discord-green)' }}>
+            <span className="text-white fw-bold">U</span>
+          </div>
+          <div className="d-flex align-items-center justify-content-center rounded-circle mb-2" 
+              style={{ width: '48px', height: '48px', backgroundColor: 'var(--discord-muted)' }}>
+            <span className="text-white fw-bold">B</span>
+          </div>
+        </div>
+
+        {/* Channel List - Wide left sidebar */}
+        <div className="sidebar-discord" style={{ width: '240px', overflow: 'auto' }}>
+          <div className="p-3 border-bottom border-discord-border">
+            <h6 className="text-discord-muted text-uppercase fw-bold mb-3 fs-7">Users</h6>
+            <UserBalances 
+              users={users || []}
+              transactions={transactions || []}
+              isLoading={isLoading}
+            />
+          </div>
+          <div className="p-3">
+            <h6 className="text-discord-muted text-uppercase fw-bold mb-3 fs-7">Commands</h6>
+            <div className="d-flex flex-column gap-1">
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !help</span>
+              </div>
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !balance</span>
+              </div>
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !catalogue</span>
+              </div>
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !buy [item]</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Content - Bot Interface */}
-        <div className="flex-grow-1 bg-discord-secondary p-3">
-          <BotInterface 
-            users={users || []}
-            catalogItems={catalogItems || []}
-            isLoading={isLoading}
-          />
+        <div className="flex-grow-1 d-flex flex-column" style={{backgroundColor: 'var(--discord-main)'}}>
+          <div className="border-bottom border-discord-border px-4 py-2 d-flex align-items-center">
+            <div className="d-flex align-items-center">
+              <span className="me-2">#</span>
+              <span className="fw-bold">minipoints-chat</span>
+            </div>
+            <div className="ms-3 text-discord-muted small">Chat with the MiniPoints Economy Bot</div>
+          </div>
+          <div className="flex-grow-1">
+            <BotInterface 
+              users={users || []}
+              catalogItems={catalogItems || []}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       </div>
     </div>

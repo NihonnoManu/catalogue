@@ -25,10 +25,10 @@ export default function BotMessage({
     
     if (content.type === "error") {
       return (
-        <div className="mt-1 max-w-2xl">
-          <div className="bg-secondary rounded p-3 border-l-4 border-destructive">
-            <p className="text-destructive font-medium">Error</p>
-            <p>{content.content}</p>
+        <div>
+          <div className="alert alert-danger p-3 mb-0">
+            <p className="text-danger fw-medium mb-1">Error</p>
+            <p className="mb-0">{content.content}</p>
           </div>
         </div>
       );
@@ -36,13 +36,14 @@ export default function BotMessage({
     
     if (content.type === "help") {
       return (
-        <div className="mt-1 max-w-2xl">
+        <div>
           <p>Welcome to the MiniPoints Economy System! Here are the commands you can use:</p>
-          <div className="mt-2 bg-secondary rounded p-3 border border-black/10">
-            <ul className="space-y-2">
+          <div className="rounded bg-discord-secondary p-3 mt-2">
+            <ul className="list-unstyled mb-0">
               {content.content.commands.map((cmd: { name: string, description: string }, index: number) => (
-                <li key={index}>
-                  <code className="bg-background px-1 py-0.5 rounded">{cmd.name}</code> - {cmd.description}
+                <li key={index} className="mb-2">
+                  <code className="bg-discord-accent px-2 py-1 rounded">{cmd.name}</code>
+                  <span className="ms-2">{cmd.description}</span>
                 </li>
               ))}
             </ul>
@@ -54,17 +55,19 @@ export default function BotMessage({
     if (content.type === "balance") {
       const user = content.content.user;
       return (
-        <div className="mt-1 max-w-2xl">
-          <div className="bg-secondary rounded p-3 border border-black/10">
-            <h3 className="font-semibold text-white mb-2">Current Balance</h3>
-            <p className="mb-2">
-              <span className="text-muted-foreground mr-2">User:</span>
-              <span className="font-medium">{user.displayName}</span>
-            </p>
-            <p>
-              <span className="text-muted-foreground mr-2">Balance:</span>
-              <span className="font-bold text-primary">{user.balance} MP</span>
-            </p>
+        <div>
+          <div className="card bg-discord-secondary border-0">
+            <div className="card-body p-3">
+              <h5 className="card-title text-discord-text mb-3">Current Balance</h5>
+              <div className="mb-2">
+                <span className="text-discord-muted me-2">User:</span>
+                <span className="fw-medium">{user.displayName}</span>
+              </div>
+              <div>
+                <span className="text-discord-muted me-2">Balance:</span>
+                <span className="fw-bold text-discord-green">{user.balance} MP</span>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -72,27 +75,29 @@ export default function BotMessage({
     
     if (content.type === "catalogue") {
       return (
-        <div className="mt-1 max-w-3xl">
-          <div className="bg-secondary rounded p-3 border border-black/10">
-            <h3 className="font-semibold text-white mb-3">Catalogue Items</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {content.content.items.map((item: CatalogItem) => (
-                <div key={item.id} className="bg-background rounded p-2 flex flex-col">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">{item.name}</span>
-                    <Badge variant="default" className="bg-primary text-white">{item.price} MP</Badge>
+        <div>
+          <div className="card bg-discord-secondary border-0">
+            <div className="card-body p-3">
+              <h5 className="card-title text-discord-text mb-3">Catalogue Items</h5>
+              <div className="row g-2">
+                {content.content.items.map((item: CatalogItem) => (
+                  <div key={item.id} className="col-12 col-md-6">
+                    <div className="catalog-item h-100">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="catalog-name">{item.name}</span>
+                        <span className="badge bg-discord-blurple">{item.price} MP</span>
+                      </div>
+                      <p className="catalog-description mb-3">{item.description}</p>
+                      <button 
+                        className="btn btn-discord-secondary btn-sm" 
+                        onClick={() => onCommandSelect(`!buy ${item.slug}`)}
+                      >
+                        Buy with !buy {item.slug}
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-muted-foreground text-sm mb-2">{item.description}</p>
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    className="mt-auto text-xs"
-                    onClick={() => onCommandSelect(`!buy ${item.slug}`)}
-                  >
-                    Buy with !buy {item.slug}
-                  </Button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -102,25 +107,27 @@ export default function BotMessage({
     if (content.type === "purchase_success") {
       const { purchase } = content.content;
       return (
-        <div className="mt-1 max-w-2xl">
-          <div className="bg-secondary rounded p-3 border-l-4 border-green-500">
-            <h3 className="font-semibold text-white mb-2">Purchase Successful!</h3>
-            <p className="mb-2">
-              <span className="text-muted-foreground">Item:</span>
-              <span className="font-medium ml-1">{purchase.item.name}</span>
-            </p>
-            <p className="mb-2">
-              <span className="text-muted-foreground">Cost:</span>
-              <span className="font-medium text-destructive ml-1">-{purchase.cost} MP</span>
-            </p>
-            <p className="mb-2">
-              <span className="text-muted-foreground">New Balance:</span>
-              <span className="font-medium text-primary ml-1">{purchase.newBalance} MP</span>
-            </p>
-            <p className="mb-1 text-muted-foreground text-sm">
-              Points have been transferred to
-              <span className="font-medium ml-1">{purchase.recipient}</span>
-            </p>
+        <div>
+          <div className="card bg-discord-secondary border-0 border-start border-4 border-discord-green">
+            <div className="card-body p-3">
+              <h5 className="card-title text-discord-text mb-3">Purchase Successful!</h5>
+              <div className="mb-2">
+                <span className="text-discord-muted">Item:</span>
+                <span className="fw-medium ms-2">{purchase.item.name}</span>
+              </div>
+              <div className="mb-2">
+                <span className="text-discord-muted">Cost:</span>
+                <span className="fw-medium text-discord-red ms-2">-{purchase.cost} MP</span>
+              </div>
+              <div className="mb-2">
+                <span className="text-discord-muted">New Balance:</span>
+                <span className="fw-medium text-discord-green ms-2">{purchase.newBalance} MP</span>
+              </div>
+              <div className="text-discord-muted small">
+                Points have been transferred to
+                <span className="fw-medium ms-1">{purchase.recipient}</span>
+              </div>
+            </div>
           </div>
         </div>
       );
