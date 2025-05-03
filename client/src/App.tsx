@@ -10,7 +10,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/catalog" component={CatalogManager} />
+      <Route path="/catalog-manager" component={CatalogManager} />
       <Route component={NotFound} />
     </Switch>
   );

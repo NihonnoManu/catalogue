@@ -1,4 +1,4 @@
-import { Transaction, User } from "@shared/schema";
+import { Transaction, User, CatalogItem } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 
@@ -6,9 +6,10 @@ interface TransactionHistoryProps {
   transactions: Transaction[];
   users: User[];
   isLoading: boolean;
+  catalogItems?: CatalogItem[];
 }
 
-export default function TransactionHistory({ transactions, users, isLoading }: TransactionHistoryProps) {
+export default function TransactionHistory({ transactions, users, isLoading, catalogItems = [] }: TransactionHistoryProps) {
   const findUserName = (userId: number): string => {
     const user = users.find(u => u.id === userId);
     return user ? user.displayName : "Unknown User";
@@ -54,7 +55,10 @@ export default function TransactionHistory({ transactions, users, isLoading }: T
                 <div className="mt-1">
                   <span className="text-discord-red">-{transaction.amount} MP</span>
                   <span className="text-discord-muted"> for </span>
-                  <span className="fw-medium">{transaction.item?.name || 'Unknown Item'}</span>
+                  <span className="fw-medium">
+                    {/* Find catalog item name by itemId */}
+                    {catalogItems?.find(item => item.id === transaction.itemId)?.name || `Item #${transaction.itemId}`}
+                  </span>
                 </div>
               </div>
             );
