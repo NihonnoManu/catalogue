@@ -222,12 +222,35 @@ export default function BotMessage({
     }
 
     if (content.type === "bargain_accepted") {
+      const { message, bargain, transaction } = content.content;
       return (
         <div>
           <div className="card bg-discord-secondary border-0 border-start border-4 border-discord-green">
             <div className="card-body p-3">
               <h5 className="card-title text-discord-text mb-3">Bargain Accepted</h5>
-              <p className="mb-0">{content.content.message}</p>
+              <p className="mb-3">{message}</p>
+              
+              {bargain && (
+                <div className="mb-3 p-2 rounded bg-discord-tertiary">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                    <span className="fw-medium">{bargain.item.name}</span>
+                    <Badge variant="secondary" className="ml-2">
+                      {bargain.discountPercentage}% off
+                    </Badge>
+                  </div>
+                  <div className="d-flex flex-wrap justify-content-between text-muted small">
+                    <span>Original: {bargain.originalPrice} minipoints</span>
+                    <span>→</span>
+                    <span className="text-success fw-medium">Agreed: {bargain.agreedPrice} minipoints</span>
+                  </div>
+                </div>
+              )}
+              
+              {transaction && (
+                <div className="small text-muted mt-2">
+                  Transaction ID: {transaction.id}
+                </div>
+              )}
             </div>
           </div>
         </div>

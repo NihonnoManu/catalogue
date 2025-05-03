@@ -6,6 +6,15 @@ import { z } from "zod";
 import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
+// Store active bargain offers by userId
+type BargainOffer = {
+  userId: number;  // The user who made the offer
+  itemSlug: string;
+  offeredPrice: number;
+  timestamp: Date;
+};
+const activeBargains: Map<number, BargainOffer> = new Map();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Discord bot
   if (process.env.DISCORD_TOKEN) {
@@ -385,6 +394,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
             
+            // Store the bargain offer
+            const bargainOffer: BargainOffer = {
+              userId: user.id,
+              itemSlug: bargainItemSlug,
+              offeredPrice: offeredPrice,
+              timestamp: new Date()
+            };
+            
+            // Find the other user (for whom this offer is intended)
+            const users = await storage.getAllUsers();
+            const otherUser = users.find(u => u.id !== user.id);
+            if (!otherUser) {
+              response = {
+                type: "error",
+                content: "Could not find the other user to make an offer to"
+              };
+              break;
+            }
+            
+            // Store the bargain in our Map using the other user's ID as the key
+            // (since they're the one who will accept or reject it)
+            activeBargains.set(otherUser.id, bargainOffer);
+            
             // Success - bargain initiated
             response = {
               type: "bargain_initiated",
@@ -437,21 +469,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
 
         case "!accept":
-          response = {
-            type: "bargain_accepted",
-            content: {
-              message: "You've accepted the bargain offer. The transaction will be processed at the discounted price."
+          try {
+            // Check if there's an active bargain offer for this user
+            const activeBargain = activeBargains.get(user.id);
+            if (!activeBargain) {
+              response = {
+                type: "error",
+                content: "You don't have any active bargain offers to accept."
+              };
+              break;
             }
-          };
+            
+            // Process the purchase with the bargained price
+            const purchaseResult = await storage.purchaseItem(
+              activeBargain.userId, // The user who made the offer
+              activeBargain.itemSlug,
+              activeBargain.offeredPrice // Use the bargained price
+            );
+            
+            // Clear the active bargain after processing
+            activeBargains.delete(user.id);
+            
+            // Build the response
+            const item = purchaseResult.item;
+            response = {
+              type: "bargain_accepted",
+              content: {
+                message: "You've accepted the bargain offer. The transaction has been processed at the discounted price.",
+                bargain: {
+                  item: item,
+                  originalPrice: item.price,
+                  agreedPrice: activeBargain.offeredPrice,
+                  discount: item.price - activeBargain.offeredPrice,
+                  discountPercentage: Math.round((item.price - activeBargain.offeredPrice) / item.price * 100)
+                },
+                transaction: purchaseResult.transaction
+              }
+            };
+          } catch (acceptError) {
+            response = {
+              type: "error",
+              content: acceptError instanceof Error ? acceptError.message : "Failed to process the bargain acceptance"
+            };
+          }
           break;
           
         case "!reject":
-          response = {
-            type: "bargain_rejected",
-            content: {
-              message: "You've rejected the bargain offer. The item remains at its original price."
+          try {
+            // Check if there's an active bargain offer for this user
+            const bargainToReject = activeBargains.get(user.id);
+            if (!bargainToReject) {
+              response = {
+                type: "error",
+                content: "You don't have any active bargain offers to reject."
+              };
+              break;
             }
-          };
+            
+            // Get the bargained item details for the response
+            const rejectedItem = await storage.getCatalogItemBySlug(bargainToReject.itemSlug);
+            
+            // Remove the bargain offer
+            activeBargains.delete(user.id);
+            
+            response = {
+              type: "bargain_rejected",
+              content: {
+                message: "You've rejected the bargain offer. The item remains at its original price.",
+                bargain: {
+                  item: rejectedItem,
+                  originalPrice: rejectedItem?.price,
+                  offeredPrice: bargainToReject.offeredPrice
+                }
+              }
+            };
+          } catch (rejectError) {
+            response = {
+              type: "error",
+              content: rejectError instanceof Error ? rejectError.message : "Failed to process the bargain rejection"
+            };
+          }
           break;
           
         default:
