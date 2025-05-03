@@ -190,79 +190,81 @@ export default function CatalogManager() {
   };
 
   return (
-    <div className="container py-md">
-      <div className="flex justify-between items-center mb-md">
+    <div className="container py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="text-lg font-bold mb-sm">Catalog Manager</h1>
-          <p className="text-muted">
+          <h1 className="fs-4 fw-bold mb-2">Catalog Manager</h1>
+          <p className="text-discord-muted">
             Add, edit, or remove items from the catalog.
           </p>
         </div>
         <Link href="/">
-          <button className="btn btn-secondary">
+          <button className="btn btn-discord-secondary">
             <ArrowLeft style={{ marginRight: '0.5rem', height: '1rem', width: '1rem' }} /> Back to Chat
           </button>
         </Link>
       </div>
 
-      <div className="flex gap-md" style={{flexDirection: 'column'}}>
+      <div className="row gy-4">
         {/* Item Form */}
-        <div>
-          <div className="card">
+        <div className="col-12 col-md-4">
+          <div className="card h-100">
             <div className="card-header">
-              <div className="card-title">{isEditing ? "Edit Item" : "Add New Item"}</div>
-              <p className="card-description text-muted">
+              <h5 className="card-title mb-0">{isEditing ? "Edit Item" : "Add New Item"}</h5>
+              <p className="card-text text-discord-muted small mt-1 mb-0">
                 {isEditing
                   ? "Edit the catalog item details"
                   : "Fill out the form to add a new item to the catalog"}
               </p>
             </div>
-            <div className="p-md">
+            <div className="card-body">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
                 >
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Coffee Run" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="mb-3">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <div className="form-group">
+                          <label className="form-label">Name</label>
+                          <input type="text" className="form-control" placeholder="Coffee Run" {...field} />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Get coffee for the whole team"
+                  <div className="mb-3">
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <div className="form-group">
+                          <label className="form-label">Description</label>
+                          <textarea 
+                            className="form-control" 
+                            placeholder="Get coffee for the whole team" 
+                            rows={3}
                             {...field}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price (minipoints)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
+                  <div className="mb-3">
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <div className="form-group">
+                          <label className="form-label">Price (minipoints)</label>
+                          <input 
+                            type="number" 
+                            className="form-control"  
                             min="1"
                             {...field}
                             onChange={(e) => {
@@ -270,20 +272,22 @@ export default function CatalogManager() {
                               field.onChange(value === "" ? 0 : parseInt(value, 10));
                             }}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Slug</FormLabel>
-                        <FormControl>
-                          <Input
+                  <div className="mb-3">
+                    <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <div className="form-group">
+                          <label className="form-label">Slug</label>
+                          <input 
+                            type="text" 
+                            className="form-control"  
                             placeholder="coffee-run"
                             {...field}
                             onChange={(e) => {
@@ -295,16 +299,16 @@ export default function CatalogManager() {
                               field.onChange(value);
                             }}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+                  </div>
 
-                  <div className="flex justify-end space-x-2 pt-2">
+                  <div className="d-flex justify-content-end gap-2 mt-4">
                     {isEditing && (
                       <button
-                        className="btn btn-secondary"
+                        className="btn btn-discord-secondary"
                         type="button"
                         onClick={handleCancelEdit}
                       >
@@ -312,7 +316,7 @@ export default function CatalogManager() {
                       </button>
                     )}
                     <button
-                      className="btn btn-primary"
+                      className="btn btn-discord-primary"
                       type="submit"
                       disabled={
                         createMutation.isPending ||
@@ -330,39 +334,37 @@ export default function CatalogManager() {
         </div>
 
         {/* Item List */}
-        <div>
-          <div className="card">
+        <div className="col-12 col-md-8">
+          <div className="card h-100">
             <div className="card-header">
-              <div className="card-title">Catalog Items</div>
-              <p className="card-description text-muted">
+              <h5 className="card-title mb-0">Catalog Items</h5>
+              <p className="card-text text-discord-muted small mt-1 mb-0">
                 Manage your existing catalog items here.
               </p>
             </div>
-            <div className="p-md">
+            <div className="card-body">
               {isLoading ? (
-                <div className="flex items-center justify-center" style={{height: '10rem'}}>
-                  <div className="flex gap-sm">
-                    <div style={{width: '0.75rem', height: '0.75rem'}} className="rounded-full bg-muted"></div>
-                    <div style={{width: '0.75rem', height: '0.75rem'}} className="rounded-full bg-muted"></div>
-                    <div style={{width: '0.75rem', height: '0.75rem'}} className="rounded-full bg-muted"></div>
+                <div className="d-flex align-items-center justify-content-center" style={{height: '10rem'}}>
+                  <div className="spinner-border text-discord-muted" role="status">
+                    <span className="visually-hidden">Loading...</span>
                   </div>
                 </div>
               ) : catalogItems && Array.isArray(catalogItems) && catalogItems.length > 0 ? (
-                <div className="table">
-                  <table className="table">
+                <div className="table-responsive">
+                  <table className="table table-hover">
                     <thead>
                       <tr>
                         <th>Name</th>
                         <th>Description</th>
                         <th>Price</th>
                         <th>Slug</th>
-                        <th style={{textAlign: 'right'}}>Actions</th>
+                        <th className="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Array.isArray(catalogItems) && catalogItems.map((item: CatalogItem) => (
                         <tr key={item.id}>
-                          <td className="font-bold">{item.name}</td>
+                          <td className="fw-bold">{item.name}</td>
                           <td>
                             {item.description.length > 30
                               ? `${item.description.substring(0, 30)}...`
@@ -370,17 +372,17 @@ export default function CatalogManager() {
                           </td>
                           <td>{item.price} pts</td>
                           <td>{item.slug}</td>
-                          <td style={{textAlign: 'right'}}>
+                          <td className="text-end">
                             <button
-                              className="btn btn-secondary"
+                              className="btn btn-discord-secondary btn-sm me-2"
                               onClick={() => handleEdit(item)}
                             >
-                              <Pencil style={{height: '1rem', width: '1rem'}} />
+                              <Pencil className="me-1" style={{height: '0.875rem', width: '0.875rem'}} /> Edit
                             </button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <button className="btn btn-secondary">
-                                  <Trash style={{height: '1rem', width: '1rem'}} />
+                                <button className="btn btn-discord-danger btn-sm">
+                                  <Trash className="me-1" style={{height: '0.875rem', width: '0.875rem'}} /> Delete
                                 </button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
@@ -411,8 +413,8 @@ export default function CatalogManager() {
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-md">
-                  <p className="text-muted">
+                <div className="text-center py-5">
+                  <p className="text-discord-muted">
                     No catalog items found. Add your first item using the form.
                   </p>
                 </div>
