@@ -39,20 +39,20 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header Bar */}
-      <header className="bg-sidebar px-4 py-3 border-b border-black/20 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary">
-            <i className="fas fa-robot text-white"></i>
+      <header className="bg-sidebar py-md px-md border-b flex items-center justify-between">
+        <div className="flex items-center gap-sm">
+          <div className="flex items-center justify-center rounded-full p-sm" style={{ width: '2rem', height: '2rem', backgroundColor: 'var(--primary-color)' }}>
+            <i className="fas fa-robot" style={{ color: 'white' }}></i>
           </div>
-          <h1 className="text-white font-bold text-lg">MiniPoints Economy Bot</h1>
+          <h1 className="font-bold text-lg" style={{ color: 'white' }}>MiniPoints Economy Bot</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-md">
           <Link href="/catalog">
-            <button className="px-3 py-1.5 rounded bg-primary text-xs text-white hover:bg-primary/80 transition-colors">
+            <button className="btn btn-primary">
               Manage Catalog
             </button>
           </Link>
-          <span className="px-2 py-1 rounded bg-green-600 text-xs text-white">ONLINE</span>
+          <span className="online-badge">ONLINE</span>
         </div>
       </header>
 
