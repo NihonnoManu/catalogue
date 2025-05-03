@@ -79,14 +79,8 @@ export default function RulesManager() {
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      // Convert parameters string to JSON
-      const formattedData = {
-        ...data,
-        parameters: data.parameters
-      };
-
-      const response = await apiRequest("POST", "/api/rules", formattedData);
+    mutationFn: async (data: FormData & { type: string, parameters: string }) => {
+      const response = await apiRequest("POST", "/api/rules", data);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to create rule");
@@ -112,16 +106,10 @@ export default function RulesManager() {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: async (data: FormData & { id: number }) => {
+    mutationFn: async (data: FormData & { id: number, type: string, parameters: string }) => {
       const { id, ...ruleData } = data;
 
-      // Convert parameters string to JSON
-      const formattedData = {
-        ...ruleData,
-        parameters: ruleData.parameters
-      };
-
-      const response = await apiRequest("PUT", `/api/rules/${id}`, formattedData);
+      const response = await apiRequest("PUT", `/api/rules/${id}`, ruleData);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to update rule");
@@ -195,9 +183,7 @@ export default function RulesManager() {
     setCurrentRuleId(rule.id);
     form.reset({
       name: rule.name,
-      description: rule.description,
-      type: rule.type,
-      parameters: rule.parameters,
+      description: rule.description
     });
   };
 
