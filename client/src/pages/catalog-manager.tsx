@@ -62,10 +62,15 @@ export default function CatalogManager() {
   const [currentItemId, setCurrentItemId] = useState<number | null>(null);
   const { toast } = useToast();
 
-  // Fetch catalog items
-  const { data: catalogItems, isLoading } = useQuery<CatalogItem[]>({
+  // Fetch catalog items and sort by price (low to high)
+  const { data: catalogItemsRaw, isLoading } = useQuery<CatalogItem[]>({
     queryKey: ["/api/catalog"],
   });
+  
+  // Sort catalog items by price
+  const catalogItems = catalogItemsRaw 
+    ? [...catalogItemsRaw].sort((a, b) => a.price - b.price) 
+    : [];
 
   // Form setup
   const form = useForm<FormData>({
@@ -190,7 +195,7 @@ export default function CatalogManager() {
   };
 
   return (
-    <div className="container py-4">
+    <div className="container-fluid py-4" style={{ backgroundColor: 'var(--discord-dark)', minHeight: '100vh' }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 className="fs-4 fw-bold mb-2">Catalog Manager</h1>
@@ -208,9 +213,9 @@ export default function CatalogManager() {
       <div className="row gy-4">
         {/* Item Form */}
         <div className="col-12 col-md-4">
-          <div className="card h-100">
-            <div className="card-header">
-              <h5 className="card-title mb-0">{isEditing ? "Edit Item" : "Add New Item"}</h5>
+          <div className="card h-100" style={{ backgroundColor: 'var(--discord-main)', borderColor: 'var(--discord-border)', borderRadius: '8px' }}>
+            <div className="card-header" style={{ backgroundColor: 'var(--discord-main)', borderColor: 'var(--discord-border)' }}>
+              <h5 className="card-title mb-0 text-white">{isEditing ? "Edit Item" : "Add New Item"}</h5>
               <p className="card-text text-discord-muted small mt-1 mb-0">
                 {isEditing
                   ? "Edit the catalog item details"
@@ -228,8 +233,8 @@ export default function CatalogManager() {
                       name="name"
                       render={({ field }) => (
                         <div className="form-group">
-                          <label className="form-label">Name</label>
-                          <input type="text" className="form-control" placeholder="Coffee Run" {...field} />
+                          <label className="form-label text-discord-text">Name</label>
+                          <input type="text" className="form-control" style={{ backgroundColor: 'var(--discord-input)', color: 'var(--discord-text)', borderColor: 'var(--discord-border)' }} placeholder="Coffee Run" {...field} />
                           <FormMessage />
                         </div>
                       )}
@@ -242,9 +247,10 @@ export default function CatalogManager() {
                       name="description"
                       render={({ field }) => (
                         <div className="form-group">
-                          <label className="form-label">Description</label>
+                          <label className="form-label text-discord-text">Description</label>
                           <textarea 
                             className="form-control" 
+                            style={{ backgroundColor: 'var(--discord-input)', color: 'var(--discord-text)', borderColor: 'var(--discord-border)' }}
                             placeholder="Get coffee for the whole team" 
                             rows={3}
                             {...field}
@@ -261,10 +267,11 @@ export default function CatalogManager() {
                       name="price"
                       render={({ field }) => (
                         <div className="form-group">
-                          <label className="form-label">Price (minipoints)</label>
+                          <label className="form-label text-discord-text">Price (minipoints)</label>
                           <input 
                             type="number" 
-                            className="form-control"  
+                            className="form-control"
+                            style={{ backgroundColor: 'var(--discord-input)', color: 'var(--discord-text)', borderColor: 'var(--discord-border)' }}  
                             min="1"
                             {...field}
                             onChange={(e) => {
@@ -284,10 +291,11 @@ export default function CatalogManager() {
                       name="slug"
                       render={({ field }) => (
                         <div className="form-group">
-                          <label className="form-label">Slug</label>
+                          <label className="form-label text-discord-text">Slug</label>
                           <input 
                             type="text" 
-                            className="form-control"  
+                            className="form-control"
+                            style={{ backgroundColor: 'var(--discord-input)', color: 'var(--discord-text)', borderColor: 'var(--discord-border)' }}  
                             placeholder="coffee-run"
                             {...field}
                             onChange={(e) => {
@@ -335,9 +343,9 @@ export default function CatalogManager() {
 
         {/* Item List */}
         <div className="col-12 col-md-8">
-          <div className="card h-100">
-            <div className="card-header">
-              <h5 className="card-title mb-0">Catalog Items</h5>
+          <div className="card h-100" style={{ backgroundColor: 'var(--discord-main)', borderColor: 'var(--discord-border)', borderRadius: '8px' }}>
+            <div className="card-header" style={{ backgroundColor: 'var(--discord-main)', borderColor: 'var(--discord-border)' }}>
+              <h5 className="card-title mb-0 text-white">Catalog Items</h5>
               <p className="card-text text-discord-muted small mt-1 mb-0">
                 Manage your existing catalog items here.
               </p>
@@ -351,7 +359,7 @@ export default function CatalogManager() {
                 </div>
               ) : catalogItems && Array.isArray(catalogItems) && catalogItems.length > 0 ? (
                 <div className="table-responsive">
-                  <table className="table table-hover">
+                  <table className="table table-hover" style={{ color: 'var(--discord-text)' }}>
                     <thead>
                       <tr>
                         <th>Name</th>

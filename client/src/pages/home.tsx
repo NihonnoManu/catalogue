@@ -62,22 +62,6 @@ export default function Home() {
 
       {/* Main Content Area with Discord-style layout */}
       <div className="d-flex flex-grow-1 overflow-hidden">
-        {/* Server List - Narrow left sidebar */}
-        <div style={{width: '72px', backgroundColor: '#1e1f22', flexShrink: 0}} className="py-3 d-flex flex-column align-items-center">
-          <div className="d-flex align-items-center justify-content-center rounded-circle mb-3" 
-              style={{ width: '48px', height: '48px', backgroundColor: 'var(--discord-blurple)' }}>
-            <span className="text-white fw-bold">M</span>
-          </div>
-          <div className="border-bottom border-discord-border w-50 mb-3"></div>
-          <div className="d-flex align-items-center justify-content-center rounded-circle mb-2" 
-              style={{ width: '48px', height: '48px', backgroundColor: 'var(--discord-green)' }}>
-            <span className="text-white fw-bold">U</span>
-          </div>
-          <div className="d-flex align-items-center justify-content-center rounded-circle mb-2" 
-              style={{ width: '48px', height: '48px', backgroundColor: 'var(--discord-muted)' }}>
-            <span className="text-white fw-bold">B</span>
-          </div>
-        </div>
 
         {/* Channel List - Wide left sidebar */}
         <div className="sidebar-discord" style={{ width: '240px', overflow: 'auto' }}>
