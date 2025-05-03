@@ -37,19 +37,20 @@ export default function Home() {
   const isLoading = isLoadingUsers || isLoadingTransactions || isLoadingCatalog;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-vh-100 d-flex flex-column">
       {/* Header Bar */}
-      <header className="bg-sidebar py-md px-md border-b flex items-center justify-between">
-        <div className="flex items-center gap-sm">
-          <div className="flex items-center justify-center rounded-full p-sm" style={{ width: '2rem', height: '2rem', backgroundColor: 'var(--primary-color)' }}>
-            <i className="fas fa-robot" style={{ color: 'white' }}></i>
+      <header className="navbar-discord py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center justify-content-center rounded-circle p-2" 
+               style={{ width: '40px', height: '40px', backgroundColor: 'var(--discord-blurple)' }}>
+            <i className="fas fa-robot text-white"></i>
           </div>
-          <h1 className="font-bold text-lg" style={{ color: 'white' }}>MiniPoints Economy Bot</h1>
+          <h1 className="fw-bold fs-4 text-white mb-0">MiniPoints Economy Bot</h1>
         </div>
-        <div className="flex items-center gap-md">
+        <div className="d-flex align-items-center gap-3">
           <Link href="/catalog">
-            <button className="btn btn-primary">
-              Manage Catalog
+            <button className="btn btn-discord-primary btn-sm">
+              <i className="fas fa-cog me-1"></i> Manage Catalog
             </button>
           </Link>
           <span className="online-badge">ONLINE</span>
@@ -57,20 +58,24 @@ export default function Home() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="d-flex flex-grow-1 overflow-hidden">
         {/* Left Sidebar - User Balances */}
-        <UserBalances 
-          users={users || []}
-          transactions={transactions || []}
-          isLoading={isLoading}
-        />
+        <div className="sidebar-discord p-3" style={{ width: '300px' }}>
+          <UserBalances 
+            users={users || []}
+            transactions={transactions || []}
+            isLoading={isLoading}
+          />
+        </div>
 
         {/* Main Content - Bot Interface */}
-        <BotInterface 
-          users={users || []}
-          catalogItems={catalogItems || []}
-          isLoading={isLoading}
-        />
+        <div className="flex-grow-1 bg-discord-secondary p-3">
+          <BotInterface 
+            users={users || []}
+            catalogItems={catalogItems || []}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
