@@ -114,11 +114,14 @@ export const storage = {
   },
   
   async getTransactionsByUserId(userId: number, limit: number = 10) {
+    // Use separate queries with fixed conditions
     return await db.query.transactions.findMany({
-      where: or(
-        eq(schema.transactions.senderId, userId),
-        eq(schema.transactions.receiverId, userId)
-      ),
+      where: (transactions) => {
+        return or(
+          eq(transactions.senderId, userId),
+          eq(transactions.receiverId, userId)
+        );
+      },
       orderBy: [desc(schema.transactions.createdAt)],
       limit,
       with: {
