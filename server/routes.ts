@@ -655,11 +655,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             response = {
               type: "all_in_success",
               content: {
-                message: `You've transferred all your ${transferResult.transferAmount} points to ${receiver.username}!`,
+                message: `You've transferred all your ${transferResult.transferAmount} points to ${receiver.displayName}!`,
                 transfer: {
                   amount: transferResult.transferAmount,
                   newSenderBalance: 0,
-                  receiver: receiver.username
+                  receiver: receiver.displayName
                 },
                 transaction: transferResult.transaction
               }

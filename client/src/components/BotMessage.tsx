@@ -192,7 +192,7 @@ export default function BotMessage({
                       <div key={tx.id} className="transaction-item p-2 mb-2">
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <div>
-                            <Badge variant={isSender ? "destructive" : "default"}>
+                            <Badge variant={isSender ? "destructive" : "default"} className="px-2 py-0.5 rounded-full text-center">
                               {isSender ? 'Sent' : 'Received'}
                             </Badge>
                             <span className="ms-2 text-discord-text">
@@ -206,8 +206,8 @@ export default function BotMessage({
                         <div className="d-flex justify-content-between">
                           <span className="text-discord-muted small">
                             {isSender ? 
-                              `To: ${tx.receiverId === 1 ? 'user1' : 'user2'}` : 
-                              `From: ${tx.senderId === 1 ? 'user1' : 'user2'}`}
+                              `To: ${tx.receiver?.displayName || 'Unknown User'}` : 
+                              `From: ${tx.sender?.displayName || 'Unknown User'}`}
                           </span>
                           <span className={`fw-medium ${isSender ? 'text-discord-red' : 'text-discord-green'}`}>
                             {isSender ? `-${tx.amount}` : `+${tx.amount}`} MP
@@ -314,8 +314,8 @@ export default function BotMessage({
                 <div className="mb-3 p-2 rounded bg-discord-tertiary">
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span className="fw-medium">Direct Transfer</span>
-                    <Badge variant="secondary" className="ml-2 bg-discord-gold text-white">
-                      All-in!  
+                    <Badge variant="secondary" className="ml-2 bg-discord-gold text-white px-3 py-1 rounded-full text-center font-semibold">
+                      🔥 All-in! 🔥
                     </Badge>
                   </div>
                   <div className="d-flex flex-wrap justify-content-between text-muted small">
