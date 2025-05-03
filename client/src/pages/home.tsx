@@ -55,6 +55,12 @@ export default function Home() {
                 Manage Catalog
               </button>
             </Link>
+            <Link href="/rules-manager">
+              <button className="btn btn-discord-secondary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-1"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path><path d="M7 7h.01"></path></svg>
+                Manage Rules
+              </button>
+            </Link>
             <div className="badge bg-discord-green text-white px-2 py-1 rounded-pill">ONLINE</div>
           </div>
         </div>
@@ -88,6 +94,12 @@ export default function Home() {
               </div>
               <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
                 <span className="text-discord-text"># !buy [item]</span>
+              </div>
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !bargain [item] [price]</span>
+              </div>
+              <div className="rounded px-2 py-1" style={{backgroundColor: 'rgba(79, 84, 92, 0.24)'}}>
+                <span className="text-discord-text"># !transactions</span>
               </div>
             </div>
           </div>

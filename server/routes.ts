@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupDiscordBot } from "./discord";
 import { z } from "zod";
-import { purchaseSchema, insertCatalogItemSchema } from "@shared/schema";
+import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -274,6 +274,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { name: "!balance", description: "Check your current balance" },
                 { name: "!catalogue", description: "View items available for purchase" },
                 { name: "!buy [item]", description: "Purchase an item from the catalogue" },
+                { name: "!bargain [item] [price]", description: "Make a bargain offer for an item" },
+                { name: "!transactions", description: "View your recent transactions (last 5)" },
                 { name: "!help", description: "Display this help message" }
               ]
             }
@@ -331,6 +333,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
           }
           break;
+
+        case "!bargain":
+          if (commandParts.length < 3) {
+            response = {
+              type: "error",
+              content: "Please specify an item and price (e.g., !bargain coffee-run 100)"
+            };
+            break;
+          }
+          
+          const bargainItemSlug = commandParts[1].toLowerCase();
+          const offeredPrice = parseInt(commandParts[2]);
+          
+          if (isNaN(offeredPrice) || offeredPrice <= 0) {
+            response = {
+              type: "error",
+              content: "Please provide a valid price (e.g., !bargain coffee-run 100)"
+            };
+            break;
+          }
+          
+          try {
+            // Check if the item exists
+            const itemToBargain = await storage.getCatalogItemBySlug(bargainItemSlug);
+            if (!itemToBargain) {
+              response = {
+                type: "error",
+                content: `Item '${bargainItemSlug}' not found in catalog`
+              };
+              break;
+            }
+            
+            // Check if the price is reasonable
+            if (offeredPrice < itemToBargain.price * 0.5) {
+              response = {
+                type: "error",
+                content: `Offered price is too low. The minimum acceptable price is ${Math.ceil(itemToBargain.price * 0.5)} points.`
+              };
+              break;
+            }
+            
+            // Check if user has enough balance
+            if (user.balance < offeredPrice) {
+              response = {
+                type: "error",
+                content: `You don't have enough balance for this offer. Your balance: ${user.balance}, Offered: ${offeredPrice}`
+              };
+              break;
+            }
+            
+            // Success - bargain initiated
+            response = {
+              type: "bargain_initiated",
+              content: {
+                bargain: {
+                  item: itemToBargain,
+                  originalPrice: itemToBargain.price,
+                  offeredPrice: offeredPrice,
+                  discount: itemToBargain.price - offeredPrice,
+                  discountPercentage: Math.round((itemToBargain.price - offeredPrice) / itemToBargain.price * 100)
+                }
+              }
+            };
+          } catch (bargainError) {
+            response = {
+              type: "error",
+              content: bargainError instanceof Error ? bargainError.message : "Failed to process bargain"
+            };
+          }
+          break;
+          
+        case "!transactions":
+          try {
+            // Get recent transactions for the user (limited to 5)
+            const userTransactions = await storage.getTransactionsByUserId(user.id, 5);
+            
+            if (userTransactions.length === 0) {
+              response = {
+                type: "transactions",
+                content: {
+                  transactions: [],
+                  message: "You don't have any transactions yet."
+                }
+              };
+              break;
+            }
+            
+            response = {
+              type: "transactions",
+              content: {
+                transactions: userTransactions
+              }
+            };
+          } catch (transactionsError) {
+            response = {
+              type: "error",
+              content: transactionsError instanceof Error ? transactionsError.message : "Failed to fetch transactions"
+            };
+          }
+          break;
           
         default:
           response = {
@@ -346,6 +448,165 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: "Failed to process command", 
         details: error instanceof Error ? error.message : "Unknown error" 
       });
+    }
+  });
+
+  // Rules API endpoints
+  // Get all rules
+  app.get(`${apiPrefix}/rules`, async (req, res) => {
+    try {
+      const rules = await storage.getAllRules();
+      res.json(rules);
+    } catch (error) {
+      console.error("Error fetching rules:", error);
+      res.status(500).json({ error: "Failed to fetch rules" });
+    }
+  });
+
+  // Get rule by ID
+  app.get(`${apiPrefix}/rules/:id`, async (req, res) => {
+    try {
+      const ruleId = parseInt(req.params.id);
+      if (isNaN(ruleId)) {
+        return res.status(400).json({ error: "Invalid rule ID" });
+      }
+
+      const rule = await storage.getRuleById(ruleId);
+      if (!rule) {
+        return res.status(404).json({ error: "Rule not found" });
+      }
+
+      res.json(rule);
+    } catch (error) {
+      console.error("Error fetching rule:", error);
+      res.status(500).json({ error: "Failed to fetch rule" });
+    }
+  });
+
+  // Create a new rule
+  app.post(`${apiPrefix}/rules`, async (req, res) => {
+    try {
+      const data = insertRuleSchema.parse(req.body);
+      const newRule = await storage.createRule(data);
+      res.status(201).json(newRule);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Validation error",
+          details: fromZodError(error).message
+        });
+      }
+
+      console.error("Error creating rule:", error);
+      res.status(500).json({ error: "Failed to create rule" });
+    }
+  });
+
+  // Update a rule
+  app.put(`${apiPrefix}/rules/:id`, async (req, res) => {
+    try {
+      const ruleId = parseInt(req.params.id);
+      if (isNaN(ruleId)) {
+        return res.status(400).json({ error: "Invalid rule ID" });
+      }
+
+      // Check if the rule exists
+      const existingRule = await storage.getRuleById(ruleId);
+      if (!existingRule) {
+        return res.status(404).json({ error: "Rule not found" });
+      }
+
+      // Partial validation of the update data
+      const updateData = insertRuleSchema.partial().parse(req.body);
+
+      const updatedRule = await storage.updateRule(ruleId, updateData);
+      res.json(updatedRule);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Validation error",
+          details: fromZodError(error).message
+        });
+      }
+
+      console.error("Error updating rule:", error);
+      res.status(500).json({ error: "Failed to update rule" });
+    }
+  });
+
+  // Delete a rule
+  app.delete(`${apiPrefix}/rules/:id`, async (req, res) => {
+    try {
+      const ruleId = parseInt(req.params.id);
+      if (isNaN(ruleId)) {
+        return res.status(400).json({ error: "Invalid rule ID" });
+      }
+
+      // Check if the rule exists
+      const existingRule = await storage.getRuleById(ruleId);
+      if (!existingRule) {
+        return res.status(404).json({ error: "Rule not found" });
+      }
+
+      const [deletedRule] = await storage.deleteRule(ruleId);
+      res.json(deletedRule);
+    } catch (error) {
+      console.error("Error deleting rule:", error);
+      res.status(500).json({ error: "Failed to delete rule" });
+    }
+  });
+
+  // Bargain endpoint
+  app.post(`${apiPrefix}/bargain`, async (req, res) => {
+    try {
+      const data = bargainSchema.parse(req.body);
+      
+      // Get the user
+      const user = await storage.getUserById(data.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Get the item
+      const item = await storage.getCatalogItemBySlug(data.itemSlug);
+      if (!item) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+      
+      // Check if the offered price is reasonable (e.g., not too low)
+      if (data.offeredPrice < item.price * 0.5) {
+        return res.status(400).json({ error: "Offered price is too low" });
+      }
+      
+      // Check if the user has enough balance
+      if (user.balance < data.offeredPrice) {
+        return res.status(400).json({ error: "Insufficient balance" });
+      }
+      
+      // In a real application, we might create a pending bargain request here
+      // and notify the other user for approval
+      // For now, we'll just return a success response
+      res.json({
+        status: "pending",
+        message: "Bargain request submitted",
+        details: {
+          item,
+          originalPrice: item.price,
+          offeredPrice: data.offeredPrice,
+          user
+        }
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Validation error",
+          details: fromZodError(error).message
+        });
+      }
+      
+      console.error("Error processing bargain:", error);
+      res.status(500).json({ error: "Failed to process bargain request" });
     }
   });
 

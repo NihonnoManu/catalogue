@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, varchar, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
@@ -86,3 +86,29 @@ export const purchaseSchema = z.object({
 });
 
 export type PurchaseRequest = z.infer<typeof purchaseSchema>;
+
+// Rules schema
+export const rules = pgTable("rules", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(), // E.g., "bargain", "discount", etc.
+  parameters: text("parameters").notNull().default(JSON.stringify({})),
+  isActive: integer("is_active").notNull().default(1), // 1 = active, 0 = inactive
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const insertRuleSchema = createInsertSchema(rules);
+
+export type Rule = typeof rules.$inferSelect;
+export type InsertRule = z.infer<typeof insertRuleSchema>;
+
+// Bargain request schema
+export const bargainSchema = z.object({
+  userId: z.number().int().positive(),
+  itemSlug: z.string().min(1),
+  offeredPrice: z.number().int().positive(),
+});
+
+export type BargainRequest = z.infer<typeof bargainSchema>;
+

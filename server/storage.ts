@@ -3,6 +3,28 @@ import * as schema from "@shared/schema";
 import { and, eq, desc, sql, gt } from "drizzle-orm";
 
 export const storage = {
+  // Rules functions
+  async getAllRules() {
+    return await db.select().from(schema.rules);
+  },
+
+  async getRuleById(id: number) {
+    const result = await db.select().from(schema.rules).where(eq(schema.rules.id, id)).limit(1);
+    return result.length ? result[0] : null;
+  },
+
+  async createRule(data: schema.InsertRule) {
+    return (await db.insert(schema.rules).values(data).returning())[0];
+  },
+
+  async updateRule(id: number, data: Partial<schema.InsertRule>) {
+    return (await db.update(schema.rules).set(data).where(eq(schema.rules.id, id)).returning())[0];
+  },
+
+  async deleteRule(id: number) {
+    return await db.delete(schema.rules).where(eq(schema.rules.id, id)).returning();
+  },
+
   // User-related operations
   async getAllUsers() {
     return await db.select().from(schema.users);
