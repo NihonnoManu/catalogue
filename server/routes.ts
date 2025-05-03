@@ -5,7 +5,7 @@ import { setupDiscordBot } from "./discord";
 import { z } from "zod";
 import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema, users, transactions } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { db } from "@db";
 
 // Store active bargain offers by userId
@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { name: "!bargain [item] [price]", description: "Make a bargain offer for an item" },
                 { name: "!accept", description: "Accept the last bargain offer" },
                 { name: "!reject", description: "Reject the last bargain offer" },
-                { name: "!all-in [item]", description: "Spend all your points on an item" },
+                { name: "!all-in", description: "Transfer all your points to the other user" },
                 { name: "!transactions", description: "View your recent transactions (last 5)" },
                 { name: "!help", description: "Display this help message" }
               ]
@@ -576,54 +576,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
             
-            // Start a transaction to ensure data consistency
-            const transferResult = await db.transaction(async (tx) => {
-              // Update sender's balance to 0
-              await tx.update(users)
-                .set({ balance: 0 })
-                .where(eq(users.id, user.id));
-              
-              // Update receiver's balance by adding the sender's balance
-              const newReceiverBalance = receiver.balance + user.balance;
-              await tx.update(users)
-                .set({ balance: newReceiverBalance })
-                .where(eq(users.id, receiver.id));
-              
-              // Create a transaction record (no itemId for direct transfers)
-              const [transaction] = await tx.insert(transactions)
-                .values({
-                  senderId: user.id,
-                  receiverId: receiver.id,
-                  amount: user.balance,
-                  itemId: null // Direct transfer, no item involved
-                })
-                .returning();
-              
-              return {
-                transaction,
-                sender: {
-                  ...user,
-                  balance: 0
-                },
-                receiver: {
-                  ...receiver,
-                  balance: newReceiverBalance
-                },
-                transferredAmount: user.balance
-              };
+            // Use a manually handled transaction
+            // 1. Update the receiver balance
+            const newReceiverBalance = receiver.balance + user.balance;
+            await storage.updateUserBalance(receiver.id, newReceiverBalance);
+            
+            // 2. Create a transaction record
+            const transaction = await storage.createTransaction({
+              senderId: user.id,
+              receiverId: receiver.id,
+              amount: user.balance,
+              itemId: 0 // Direct transfer, no item involved, using 0 as placeholder (since null not allowed)
             });
+            
+            // 3. Update the sender's balance (set to 0)
+            await storage.updateUserBalance(user.id, 0);
+            
+            // Get updated user info
+            const updatedUser = await storage.getUserById(user.id);
             
             // Build the response
             response = {
               type: "all_in_success",
               content: {
-                message: `You've transferred all your ${transferResult.transferredAmount} points to ${receiver.username}!`,
+                message: `You've transferred all your ${user.balance} points to ${receiver.username}!`,
                 transfer: {
-                  amount: transferResult.transferredAmount,
+                  amount: user.balance,
                   newSenderBalance: 0,
                   receiver: receiver.username
                 },
-                transaction: transferResult.transaction
+                transaction: transaction
               }
             };
           } catch (allInError) {
