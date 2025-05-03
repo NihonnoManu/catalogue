@@ -3,9 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupDiscordBot } from "./discord";
 import { z } from "zod";
-import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema, users, transactions } from "@shared/schema";
+import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema, users, transactions, catalogItems } from "@shared/schema";
+import * as schema from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
-import { eq, or } from "drizzle-orm";
+import { eq, or, desc, sql } from "drizzle-orm";
 import { db } from "@db";
 
 // Store active bargain offers by userId
@@ -444,7 +445,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case "!transactions":
           try {
             // Get recent transactions for the user (limited to 5)
-            const userTransactions = await storage.getTransactionsByUserId(user.id, 5);
+            const userTransactions = await db.query.transactions.findMany({
+              where: (transactions) => {
+                return or(
+                  eq(transactions.senderId, user.id),
+                  eq(transactions.receiverId, user.id)
+                );
+              },
+              orderBy: [desc(schema.transactions.createdAt)],
+              limit: 5,
+              with: {
+                sender: true,
+                receiver: true,
+                item: true
+              }
+            });
             
             if (userTransactions.length === 0) {
               response = {
@@ -457,13 +472,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
             
+            // Format transactions like the UI displays them
+            const formattedTransactions = userTransactions.map(tx => {
+              const isOutgoing = tx.senderId === user.id;
+              const otherParty = isOutgoing ? tx.receiver.displayName : tx.sender.displayName;
+              const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
+              const itemName = tx.item ? tx.item.name : "Direct transfer";
+              
+              return {
+                ...tx,
+                formattedAmount: amountDisplay,
+                otherParty,
+                direction: isOutgoing ? "sent" : "received",
+                itemName
+              };
+            });
+            
             response = {
               type: "transactions",
               content: {
-                transactions: userTransactions
+                transactions: formattedTransactions
               }
             };
           } catch (transactionsError) {
+            console.error("Transaction error:", transactionsError);
             response = {
               type: "error",
               content: transactionsError instanceof Error ? transactionsError.message : "Failed to fetch transactions"
@@ -556,18 +588,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
         case "!all-in":
           try {
-            // Check if user has any balance at all
-            if (user.balance <= 0) {
-              response = {
-                type: "error",
-                content: "You don't have any points to transfer."
-              };
-              break;
-            }
-            
             // Find the other user who will receive the points
-            const users = await storage.getAllUsers();
-            const receiver = users.find(u => u.id !== user.id);
+            const allUsers = await storage.getAllUsers();
+            const receiver = allUsers.find(u => u.id !== user.id);
             if (!receiver) {
               response = {
                 type: "error",
@@ -576,46 +599,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             }
             
+            // Get latest user data (in case it changed)
+            const currentUser = await storage.getUserById(user.id);
+            if (!currentUser) {
+              response = {
+                type: "error",
+                content: "Could not find your user data."
+              };
+              break;
+            }
+            
+            // Check if user has any balance at all
+            if (currentUser.balance <= 0) {
+              response = {
+                type: "error",
+                content: "You don't have any points to transfer."
+              };
+              break;
+            }
+            
+            const amountToTransfer = currentUser.balance;
+            
             // Start a database transaction for consistency
             const transferResult = await db.transaction(async (tx) => {
               // 1. Update the receiver balance
-              const newReceiverBalance = receiver.balance + user.balance;
-              await tx.update(users)
+              const newReceiverBalance = receiver.balance + amountToTransfer;
+              await tx.update(schema.users)
                 .set({ balance: newReceiverBalance })
-                .where(eq(users.id, receiver.id));
+                .where(eq(schema.users.id, receiver.id));
               
               // 2. Create a transaction record
-              // Use a raw insert to bypass the validation that would require an itemId
-              const [transaction] = await tx.insert(transactions)
+              // Use raw insert without itemId
+              const [transaction] = await tx.insert(schema.transactions)
                 .values({
-                  senderId: user.id,
+                  senderId: currentUser.id,
                   receiverId: receiver.id,
-                  amount: user.balance,
-                  // Omit itemId entirely
+                  amount: amountToTransfer
+                  // Deliberately omit itemId for direct transfers
                 })
                 .returning();
               
               // 3. Update the sender's balance (set to 0)
-              await tx.update(users)
+              await tx.update(schema.users)
                 .set({ balance: 0 })
-                .where(eq(users.id, user.id));
+                .where(eq(schema.users.id, currentUser.id));
                 
               return {
                 transaction,
-                receiverBalance: newReceiverBalance
+                receiverBalance: newReceiverBalance,
+                transferAmount: amountToTransfer
               };
             });
-            
-            // Get updated user info
-            const updatedUser = await storage.getUserById(user.id);
             
             // Build the response
             response = {
               type: "all_in_success",
               content: {
-                message: `You've transferred all your ${user.balance} points to ${receiver.username}!`,
+                message: `You've transferred all your ${transferResult.transferAmount} points to ${receiver.username}!`,
                 transfer: {
-                  amount: user.balance,
+                  amount: transferResult.transferAmount,
                   newSenderBalance: 0,
                   receiver: receiver.username
                 },
