@@ -190,18 +190,18 @@ export default function CatalogManager() {
   };
 
   return (
-    <div className="container py-10">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container py-md">
+      <div className="flex justify-between items-center mb-md">
         <div>
-          <h1 className="text-3xl font-bold">Catalog Manager</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-lg font-bold mb-sm">Catalog Manager</h1>
+          <p className="text-muted">
             Add, edit, or remove items from the catalog.
           </p>
         </div>
         <Link href="/">
-          <Button variant="ghost">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Chat
-          </Button>
+          <button className="btn btn-secondary">
+            <ArrowLeft style={{ marginRight: '0.5rem', height: '1rem', width: '1rem' }} /> Back to Chat
+          </button>
         </Link>
       </div>
 
