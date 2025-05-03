@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import CatalogManager from "@/pages/catalog-manager";
-import RulesManager from "@/pages/rules-manager";
+import RulesManager from "./pages/rules-manager";
 
 function Router() {
   return (
