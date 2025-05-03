@@ -65,11 +65,23 @@ export default function BotInterface({ users, catalogItems, isLoading }: BotInte
   // Scroll to bottom when messages change
   useEffect(() => {
     if (chatAreaRef.current) {
+      // Immediate scroll attempt
+      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+      
+      // Follow-up scrolls with different delays
       setTimeout(() => {
         if (chatAreaRef.current) {
           chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
         }
-      }, 100); // Small delay to ensure content is rendered
+      }, 100);
+      
+      setTimeout(() => {
+        if (chatAreaRef.current) {
+          chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+          // Alternative scroll method
+          chatAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 300);
     }
   }, [messages]);
 

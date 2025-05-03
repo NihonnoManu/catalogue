@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
-import { Rule, insertRuleSchema } from "@shared/schema";
+import { Rule } from "@shared/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 import { Link } from "wouter";
 
 // UI Components
@@ -50,6 +51,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Pencil, Trash, Plus, ArrowLeft } from "lucide-react";
 
+// Type definition for the form
 type FormData = {
   name: string;
   description: string;
@@ -70,7 +72,10 @@ export default function RulesManager() {
 
   // Form setup
   const form = useForm<FormData>({
-    resolver: zodResolver(insertRuleSchema),
+    resolver: zodResolver(z.object({
+      name: z.string().min(1, "Name is required"),
+      description: z.string().min(1, "Description is required"),
+    })),
     defaultValues: {
       name: "",
       description: ""
