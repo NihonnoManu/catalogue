@@ -6,6 +6,9 @@ import dotenv from 'dotenv';
 // Load environment variables from .env file
 dotenv.config();
 
+require('dotenv').config()
+console.log(process.env) // remove this after you've confirmed it is working
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
