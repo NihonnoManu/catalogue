@@ -87,6 +87,7 @@ export default function Home() {
               users={users || []}
               transactions={transactions || []}
               isLoading={isLoading}
+              catalogItems={catalogItems || []}
             />
           </div>
           <div className="p-3">

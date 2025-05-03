@@ -7,6 +7,7 @@ interface UserBalancesProps {
   users: User[];
   transactions: Transaction[];
   isLoading: boolean;
+  catalogItems?: CatalogItem[];
 }
 
 export default function UserBalances({ users, transactions, isLoading }: UserBalancesProps) {
