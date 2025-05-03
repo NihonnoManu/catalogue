@@ -131,16 +131,18 @@ export default function BotMessage({
   };
 
   return (
-    <div className="flex mb-4">
-      <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white mr-3">
-        <i className="fas fa-robot"></i>
+    <div className="message message-bot">
+      <div className="message-avatar" style={{backgroundColor: '#5865F2'}}>
+        <i className="fas fa-robot">B</i>
       </div>
       <div>
-        <div className="flex items-center">
-          <span className="font-semibold text-white mr-2">MiniPoints Bot</span>
-          <span className="text-xs text-muted-foreground">{messageTime}</span>
+        <div className="d-flex align-items-center mb-1">
+          <span className="fw-semibold text-discord-text me-2">MiniPoints Bot</span>
+          <span className="message-timestamp">{messageTime}</span>
         </div>
-        {renderMessageContent()}
+        <div className="message-content">
+          {renderMessageContent()}
+        </div>
       </div>
     </div>
   );

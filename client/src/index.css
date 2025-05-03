@@ -1,20 +1,30 @@
 /* Discord theme variables */
 :root {
   /* Colors */
-  --discord-bg: #202225; /* Discord dark background */
+  --discord-bg: #36393f; /* Discord dark background */
   --discord-text: #dcddde; /* Discord text color */
   --discord-card: #2f3136; /* Discord lighter dark */
   --discord-blurple: #5865f2; /* Discord primary color */
-  --discord-secondary: #36393f; /* Discord lighter shade */
+  --discord-secondary: #2f3136; /* Discord lighter shade */
   --discord-muted: #72767d; /* Discord muted text */
   --discord-accent: #40444b; /* Discord accent */
   --discord-red: #ed4245; /* Discord red */
   --discord-border: #42464d;
   --discord-green: #3ba55c;
+  --discord-main: #36393f; /* Discord main content area */
   
   /* Sidebar colors */
-  --discord-sidebar-bg: #292b2f;
-  --discord-sidebar-border: #1e1f22;
+  --discord-sidebar-bg: #2f3136;
+  --discord-sidebar-border: #202225;
+  --discord-channels-bg: #2f3136;
+  
+  /* WhatsApp colors */
+  --whatsapp-green: #25D366;
+  --whatsapp-dark-green: #128C7E;
+  --whatsapp-light-green: #DCF8C6;
+  --whatsapp-bg: #0C1317;
+  --whatsapp-chat-bg: #0B141A;
+  --whatsapp-panel-bg: #1F2C33;
 }
 
 /* Override Bootstrap variables with Discord theme */
@@ -22,6 +32,9 @@ body {
   background-color: var(--discord-bg);
   color: var(--discord-text);
   font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
 }
 
 /* Bootstrap overrides for Discord theme */
@@ -178,4 +191,191 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--discord-muted);
+}
+
+/* Chat styles - Discord/WhatsApp inspired */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* Message bubbles */
+.message {
+  display: flex;
+  margin-bottom: 0.75rem;
+  max-width: 85%;
+}
+
+.message-user {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.message-bot {
+  margin-right: auto;
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+  flex-shrink: 0;
+}
+
+.message-content {
+  padding: 10px 15px;
+  border-radius: 18px;
+  position: relative;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.message-bot .message-content {
+  background-color: var(--discord-secondary);
+  color: var(--discord-text);
+  border-top-left-radius: 4px;
+}
+
+.message-user .message-content {
+  background-color: var(--discord-blurple);
+  color: white;
+  border-top-right-radius: 4px;
+}
+
+.message-timestamp {
+  font-size: 0.7rem;
+  color: var(--discord-muted);
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
+/* WhatsApp style */
+.whatsapp-theme .message-user .message-content {
+  background-color: var(--whatsapp-light-green);
+  color: #303030;
+}
+
+.whatsapp-theme .message-bot .message-content {
+  background-color: var(--whatsapp-panel-bg);
+}
+
+/* Command input */
+.command-input {
+  padding: 1rem;
+  background-color: var(--discord-secondary);
+  border-top: 1px solid var(--discord-border);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.command-input input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--discord-accent);
+  color: var(--discord-text);
+  padding-right: 3rem;
+}
+
+.command-input input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--discord-blurple);
+}
+
+.send-button {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--discord-blurple);
+  cursor: pointer;
+}
+
+/* User list */
+.user-list {
+  margin-bottom: 1.5rem;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  background-color: var(--discord-secondary);
+  transition: background-color 0.1s ease;
+}
+
+.user-item:hover {
+  background-color: var(--discord-accent);
+}
+
+.user-item.active {
+  background-color: rgba(88, 101, 242, 0.2);
+  border-left: 3px solid var(--discord-blurple);
+}
+
+.user-info {
+  margin-left: 0.75rem;
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--discord-text);
+}
+
+.user-balance {
+  font-size: 0.8rem;
+  color: var(--discord-muted);
+}
+
+/* Catalog styles */
+.catalog-item {
+  border-radius: 8px;
+  background-color: var(--discord-secondary);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.catalog-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.catalog-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.catalog-description {
+  color: var(--discord-muted);
+  margin-bottom: 0.75rem;
+}
+
+.catalog-price {
+  font-weight: 600;
+  color: var(--discord-green);
 }
