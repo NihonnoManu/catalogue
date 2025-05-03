@@ -26,47 +26,41 @@ export default function TransactionHistory({ transactions, users, isLoading }: T
   };
 
   return (
-    <div className="flex-1 overflow-y-auto rounded bg-background p-2">
-      <div className="space-y-2">
+    <div className="overflow-auto" style={{maxHeight: '200px'}}>
+      <div className="d-flex flex-column gap-2">
         {isLoading ? (
-          Array(3).fill(0).map((_, index) => (
-            <div key={index} className="p-2">
-              <div className="flex justify-between mb-1">
-                <Skeleton className="h-3 w-16" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-              <div className="flex items-center space-x-1">
-                <Skeleton className="h-3 w-12" />
-                <Skeleton className="h-3 w-8" />
-                <Skeleton className="h-3 w-16" />
-              </div>
+          <div className="d-flex align-items-center justify-content-center py-3">
+            <div className="spinner-border spinner-border-sm text-discord-muted" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
-          ))
+            <span className="ms-2 text-discord-muted">Loading transactions...</span>
+          </div>
         ) : transactions.length > 0 ? (
           transactions.map((transaction) => {
             const senderName = findUserName(transaction.senderId);
             const receiverName = findUserName(transaction.receiverId);
-            const borderColor = senderName === users[0]?.displayName ? "border-primary" : "border-green-500";
+            const borderColor = senderName === users[0]?.displayName ? 
+              'border-discord-blurple' : 'border-discord-green';
             
             return (
               <div 
                 key={transaction.id} 
-                className={`text-xs p-2 border-l-2 ${borderColor} bg-secondary rounded`}
+                className={`small p-2 border-start border-3 ${borderColor} bg-discord-secondary rounded`}
               >
-                <div className="flex justify-between">
-                  <span>{senderName}</span>
-                  <span className="text-muted-foreground">{formatDate(transaction.createdAt)}</span>
+                <div className="d-flex justify-content-between">
+                  <span className="fw-medium">{senderName}</span>
+                  <span className="text-discord-muted">{formatDate(transaction.createdAt)}</span>
                 </div>
                 <div className="mt-1">
-                  <span className="text-destructive">-{transaction.amount} MP</span>
-                  <span className="text-muted-foreground"> for </span>
-                  <span>{transaction.item?.name || 'Unknown Item'}</span>
+                  <span className="text-discord-red">-{transaction.amount} MP</span>
+                  <span className="text-discord-muted"> for </span>
+                  <span className="fw-medium">{transaction.item?.name || 'Unknown Item'}</span>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="text-center py-4 text-muted-foreground">No transactions yet</div>
+          <div className="text-center py-4 text-discord-muted">No transactions yet</div>
         )}
       </div>
     </div>
