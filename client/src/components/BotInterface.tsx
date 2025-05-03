@@ -48,6 +48,8 @@ export default function BotInterface({ users, catalogItems, isLoading }: BotInte
                 { name: "!balance", description: "Check your current balance" },
                 { name: "!catalogue", description: "View items available for purchase" },
                 { name: "!buy [item]", description: "Purchase an item from the catalogue" },
+                { name: "!bargain [item] [price]", description: "Make a bargain offer for an item" },
+                { name: "!transactions", description: "View your recent transactions (last 5)" },
                 { name: "!help", description: "Display this help message" }
               ]
             }
