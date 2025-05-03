@@ -98,7 +98,12 @@ export const rules = pgTable("rules", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
-export const insertRuleSchema = createInsertSchema(rules);
+export const insertRuleSchema = createInsertSchema(rules, {
+  name: (schema) => schema.min(1, "Name is required"),
+  description: (schema) => schema.min(1, "Description is required"),
+  type: (schema) => schema.min(1, "Type is required"),
+  parameters: (schema) => schema.min(1, "Parameters are required")
+});
 
 export type Rule = typeof rules.$inferSelect;
 export type InsertRule = z.infer<typeof insertRuleSchema>;
