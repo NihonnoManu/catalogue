@@ -130,7 +130,7 @@ export const storage = {
   },
   
   // Purchase item operation
-  async purchaseItem(senderId: number, itemSlug: string) {
+  async purchaseItem(senderId: number, itemSlug: string, customPrice?: number) {
     // Get the sender
     const sender = await this.getUserById(senderId);
     if (!sender) {
@@ -143,8 +143,11 @@ export const storage = {
       throw new Error("Item not found");
     }
     
+    // Use the custom price if provided, otherwise use the item's original price
+    const actualPrice = customPrice !== undefined ? customPrice : item.price;
+    
     // Check if sender has enough balance
-    if (sender.balance < item.price) {
+    if (sender.balance < actualPrice) {
       throw new Error("Insufficient balance");
     }
     
@@ -158,13 +161,13 @@ export const storage = {
     // Start a transaction to ensure data consistency
     return await db.transaction(async (tx) => {
       // Update sender's balance
-      const newSenderBalance = sender.balance - item.price;
+      const newSenderBalance = sender.balance - actualPrice;
       await tx.update(schema.users)
         .set({ balance: newSenderBalance })
         .where(eq(schema.users.id, sender.id));
       
       // Update receiver's balance
-      const newReceiverBalance = receiver.balance + item.price;
+      const newReceiverBalance = receiver.balance + actualPrice;
       await tx.update(schema.users)
         .set({ balance: newReceiverBalance })
         .where(eq(schema.users.id, receiver.id));
@@ -174,7 +177,7 @@ export const storage = {
         .values({
           senderId: sender.id,
           receiverId: receiver.id,
-          amount: item.price,
+          amount: actualPrice,
           itemId: item.id
         })
         .returning();
@@ -189,7 +192,8 @@ export const storage = {
           ...receiver,
           balance: newReceiverBalance
         },
-        item
+        item,
+        actualPrice // Return the actual price paid
       };
     });
   }
