@@ -54,6 +54,9 @@ export async function handleCommand(commandText: string, user: User): Promise<st
         
       case '!all-in':
         return await handleAllIn(user.id);
+
+      case '!rules':
+        return await getRulesMessage();
       
       default:
         return `Unknown command: ${command}. Try !help for a list of commands.`;
@@ -381,3 +384,24 @@ ${receiver.displayName}'s new balance: ${transferResult.receiverBalance} MP
     return `Failed to transfer all points: ${error instanceof Error ? error.message : 'An error occurred'}`;
   }
 }
+
+/**
+ * Generate the catalogue message
+ */
+async function getRulesMessage(): Promise<string> {
+  const rules = await storage.getAllRules();
+  
+  if (rules.length === 0) {
+    return 'No rules are currently available in the catalogue.';
+  }
+  
+  let message = '**Rules**\n\n';
+  
+  rules.forEach(rule => {
+    message += `**${rule.name}**\n`;
+    message += `${rule.description}\n`;
+  });
+  
+  return message;
+}
+
