@@ -192,11 +192,11 @@ export default function BotMessage({
                       <div key={tx.id} className="transaction-item p-2 mb-2">
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <div>
-                            <Badge variant={isSender ? "sent" : "received"} className="px-2 py-0.5 rounded-full text-center">
+                            <Badge variant={isSender ? "destructive" : "default"} className="px-2 py-0.5 rounded-full text-center">
                               {isSender ? 'Sent' : 'Received'}
                             </Badge>
                             <span className="ms-2 text-discord-text">
-                              {itemDetails ? itemDetails.name : 'All-in'}
+                              {itemDetails ? itemDetails.name : 'Points Transfer'}
                             </span>
                           </div>
                           <span className="transaction-date small text-discord-muted">
@@ -246,16 +246,16 @@ export default function BotMessage({
                     </Badge>
                   </div>
                   <div className="d-flex flex-wrap justify-content-between text-muted small">
-                    <span className="text-success">Original: {bargain.originalPrice} minipoints</span>
-                    <span className="text-success">→</span>
+                    <span>Original: {bargain.originalPrice} minipoints</span>
+                    <span>→</span>
                     <span className="text-success fw-medium">Agreed: {bargain.agreedPrice} minipoints</span>
                   </div>
                 </div>
               )}
               
               {transaction && (
-                <div className="hidden small text-muted mt-2">
-                  //Transaction ID: {transaction.id}
+                <div className="small text-muted mt-2">
+                  Transaction ID: {transaction.id}
                 </div>
               )}
             </div>
@@ -320,7 +320,7 @@ export default function BotMessage({
                   </div>
                   <div className="d-flex flex-wrap justify-content-between text-muted small">
                     <span className="text-discord-gold fw-medium">Amount: {transfer.amount} minipoints</span>
-                    <span className="text-discord-gold">→</span>
+                    <span>→</span>
                     <span className="text-discord-muted">To: {transfer.receiver}</span>
                   </div>
                   <div className="mt-2">
@@ -330,8 +330,8 @@ export default function BotMessage({
               )}
               
               {transaction && (
-                <div className="hidden small text-muted mt-2">
-                 // Transaction ID: {transaction.id}
+                <div className="small text-muted mt-2">
+                  Transaction ID: {transaction.id}
                 </div>
               )}
             </div>

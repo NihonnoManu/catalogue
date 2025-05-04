@@ -10,10 +10,6 @@ const badgeVariants = cva(
       variant: {
         default:
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        sent:
-          "border-transparent rounded-pill bg-warning text-warning-foreground text-dark hover:bg-warning/80",
-        received:
-          "border-transparent rounded-pill bg-success text-success-foreground hover:bg-success/80",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
