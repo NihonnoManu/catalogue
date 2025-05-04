@@ -82,6 +82,7 @@ function getHelpMessage(): string {
 \`!reject\` - Reject the last bargain offer
 \`!all-in\` - Transfer all your points to the other user
 \`!transactions\` - View your recent transactions (last 5)
+\`!rules\` - View special rules
 \`!help\` - Display this help message
 `;
 }
