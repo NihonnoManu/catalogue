@@ -170,8 +170,13 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
       const itemName = tx.item ? tx.item.name : 'Direct transfer';
       const date = new Date(tx.createdAt).toLocaleDateString();
+  
+      // Format the transaction date/time
+      const transactionDate = new Date(tx.createdAt);
+      const dateStr = transactionDate.toLocaleDateString();
+      const timeStr = transactionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
-      message += `**${itemName}** (${date})\n`;
+      message += `**${itemName}** (${transactionDate})\n`;
       message += `${isOutgoing ? 'To' : 'From'}: ${otherParty}\n`;
       message += `Amount: ${amountDisplay} MP\n\n`;
     });
