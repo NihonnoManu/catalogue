@@ -5,18 +5,26 @@ import { setupDiscordBot } from "./discord";
 import { z } from "zod";
 import { purchaseSchema, insertCatalogItemSchema, insertRuleSchema, bargainSchema, users, transactions, catalogItems } from "@shared/schema";
 import * as schema from "@shared/schema";
-import { fromZodError } from "zod-validation-error";
-import { eq, or, desc, sql } from "drizzle-orm";
-import { db } from "@db";
 
-// Store active bargain offers by userId
-type BargainOffer = {
+// Export BargainOffer type for use in other modules
+export type BargainOffer = {
   userId: number;  // The user who made the offer
   itemSlug: string;
   offeredPrice: number;
   timestamp: Date;
 };
+import { fromZodError } from "zod-validation-error";
+import { eq, or, desc, sql } from "drizzle-orm";
+import { db } from "@db";
+
+// Store active bargain offers by userId
 const activeBargains: Map<number, BargainOffer> = new Map();
+
+// Make activeBargains available globally for Discord bot usage
+declare global {
+  var activeBargains: Map<number, BargainOffer>;
+}
+global.activeBargains = activeBargains;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Discord bot
