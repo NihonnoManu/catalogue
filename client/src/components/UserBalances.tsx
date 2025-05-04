@@ -28,7 +28,8 @@ export default function UserBalances({ users, transactions, isLoading, catalogIt
         users.map((user) => (
           <div key={user.id} className="user-item mb-2">
             <div className="user-avatar" style={{
-              backgroundColor: user.id === 1 ? '#5865F2' : '#ED4245', 
+              //backgroundColor: user.id === 1 ? '#5865F2' : '#ED4245', 
+              backgroundColor: user.avatarColor, 
             }}>
               {user.displayName.charAt(0).toUpperCase()}
             </div>
