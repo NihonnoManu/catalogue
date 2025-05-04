@@ -51,7 +51,7 @@ export const storage = {
   
   // Catalog items operations
   async getAllCatalogItems() {
-    return await db.select().from(schema.catalogItems);
+     return await db.select().from(schema.catalogItems).orderBy(schema.catalogItems.price);
   },
   
   async getCatalogItemById(id: number) {
