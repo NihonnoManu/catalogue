@@ -57,7 +57,8 @@ export default function CommandInput({
                 style={{ cursor: 'pointer' }}
               >
                 <div className="user-avatar" style={{ 
-                  backgroundColor: user.id === 1 ? '#5865F2' : '#ED4245',
+                  //backgroundColor: user.id === 1 ? '#5865F2' : '#ED4245',
+                  backgroundColor: user.avatarColor, 
                   width: '32px',
                   height: '32px',
                   fontSize: '14px'
