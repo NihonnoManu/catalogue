@@ -192,7 +192,7 @@ export default function BotMessage({
                       <div key={tx.id} className="transaction-item p-2 mb-2">
                         <div className="d-flex justify-content-between align-items-center mb-1">
                           <div>
-                            <Badge variant={isSender ? "destructive" : "default"} className="px-2 py-0.5 rounded-full text-center" style="border-radius: 18px;border-top-left-radius: 6px;">
+                            <Badge variant={isSender ? "sent" : "received"} className="px-2 py-0.5 rounded-full text-center" style="border-radius: 18px;border-top-left-radius: 6px;">
                               {isSender ? 'Sent' : 'Received'}
                             </Badge>
                             <span className="ms-2 text-discord-text">
