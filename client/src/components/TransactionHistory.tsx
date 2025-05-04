@@ -41,7 +41,7 @@ export default function TransactionHistory({ transactions, users, isLoading, cat
             const senderName = findUserName(transaction.senderId);
             const receiverName = findUserName(transaction.receiverId);
             const borderColor = senderName === users[0]?.displayName ? 
-              'border-discord-blurple' : 'border-discord-green';
+              'border-discord-purple' : 'border-discord-green';
             
             return (
               <div 
