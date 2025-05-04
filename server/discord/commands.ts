@@ -98,21 +98,28 @@ Balance: **${user.balance} MP**
  * Generate the catalogue message
  */
 async function getCatalogueMessage(): Promise<string> {
-  const items = await storage.getAllCatalogItems();
-  
-  if (items.length === 0) {
-    return 'No items are currently available in the catalogue.';
+  try {
+    // Get the catalog items from the database
+    const items = await storage.getAllCatalogItems();
+    
+    if (!items || items.length === 0) {
+      return 'No items are currently available in the catalogue.';
+    }
+    
+    // Format the message with item details
+    let message = '**Catalogue Items**\n\n';
+    
+    items.forEach(item => {
+      message += `**${item.name}** - ${item.price} MP\n`;
+      message += `${item.description}\n`;
+      message += `To purchase: \`!buy ${item.slug}\`\n\n`;
+    });
+    
+    return message;
+  } catch (error) {
+    console.error('Error generating catalogue message:', error);
+    return 'Failed to retrieve the catalogue. Please try again later.';
   }
-  
-  let message = '**Catalogue Items**\n\n';
-  
-  items.forEach(item => {
-    message += `**${item.name}** - ${item.price} MP\n`;
-    message += `${item.description}\n`;
-    message += `To purchase: \`!buy ${item.slug}\`\n\n`;
-  });
-  
-  return message;
 }
 
 /**
