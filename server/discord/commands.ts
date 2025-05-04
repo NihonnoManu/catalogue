@@ -372,9 +372,10 @@ async function handleAllIn(userId: number): Promise<string> {
 You've transferred all your ${transferResult.transferAmount} points to ${receiver.displayName}!
 Your new balance: 0 MP
 ${receiver.displayName}'s new balance: ${transferResult.receiverBalance} MP
-
-Transfer ID: ${transferResult.transaction.id}
 `;
+    
+  //console.log("Transfer ID: ${transferResult.transaction.id}");
+    
   } catch (error) {
     console.error('All-in error:', error);
     return `Failed to transfer all points: ${error instanceof Error ? error.message : 'An error occurred'}`;
