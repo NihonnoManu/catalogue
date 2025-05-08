@@ -46,8 +46,18 @@ export async function setupDiscordBot() {
         const response = await handleCommand(message.content, user);
         
         // Send the response back to Discord
+	console.log(response.length);
         if (response) {
-          await message.reply(response);
+		if(response.length<2000){
+	          await message.reply(response);
+		}else{
+			let chunks = splitMessage(response)
+			for (let i = 0; i < chunks.length; i++){
+                                console.log(chunks[i]);
+                                await message.reply(chunks[i]);
+                        }
+		}
+
         }
       } catch (error) {
         console.error('Error handling command:', error);
@@ -71,4 +81,28 @@ export function getDiscordClient() {
     throw new Error('Discord client not initialized. Call setupDiscordBot first.');
   }
   return client;
+}
+
+
+function splitMessage(text: string, maxLength = 2000): string[] {
+    const chunks: string[] = [];
+
+    while (text.length > maxLength) {
+        let splitIndex = text.lastIndexOf('\n', maxLength);
+        if (splitIndex === -1) {
+            splitIndex = text.lastIndexOf(' ', maxLength);
+        }
+        if (splitIndex === -1) {
+            splitIndex = maxLength;
+        }
+
+        chunks.push(text.slice(0, splitIndex));
+        text = text.slice(splitIndex).trimStart();
+    }
+
+    if (text.length > 0) {
+        chunks.push(text);
+    }
+
+    return chunks;
 }
