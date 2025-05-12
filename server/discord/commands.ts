@@ -57,6 +57,10 @@ export async function handleCommand(commandText: string, user: User): Promise<st
 
       case '!rules':
         return await getRulesMessage();
+
+      case '!teodio':
+      case 'teodio':
+	return await getTeOdioMessage(user);
       
       default:
         return `Unknown command: ${command}. Try !help for a list of commands.`;
@@ -406,3 +410,33 @@ async function getRulesMessage(): Promise<string> {
   return message;
 }
 
+/**
+ * Generate te odio message
+ */
+
+
+async function getTeOdioMessage(user): Promise<string> {
+  
+  let message = '**Traducción**\n\n';
+  message += `Lo que ${user.displayName} intenta decir es:\n`;
+
+  let teodio = ["Me gustas","Me encantas","Daisuki","d)","Te quiero","Me apeteces"]
+
+  let rdm = Math.floor(Math.random() * (5 - 0 + 1) + 0);
+
+  console.log(user.id=='2')
+  
+  if(rdm==3 && user.id=='2')
+    message +=`**De rodillas**\n`;
+  if(rdm==3 && user.id=='1')
+    message +=`**¿Un ratito más?**\n`;
+  else
+    message +=`**${teodio[rdm]}**\n`;
+  
+//  rules.forEach(rule => {
+//   message += `**${rule.name}**\n`;
+//    message += `${rule.description}\n`;
+//  });
+
+  return message;
+}
