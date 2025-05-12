@@ -29,6 +29,10 @@ export async function setupDiscordBot() {
     // Ignore messages from bots to prevent loops
     if (message.author.bot) return;
 
+
+	let lowercase = message.content.toLowerCase();
+	
+
     // Check if this is a command (starts with !)
     if (message.content.startsWith('!')) {
       try {
@@ -63,7 +67,7 @@ export async function setupDiscordBot() {
         console.error('Error handling command:', error);
         await message.reply('Sorry, there was an error processing your command. Please try again later.');
       }
-    }else if (message.content.startsWith('Te odio')) {
+    }else if (lowercase.startsWith('te odio')) {
       try {
         // Get user from database or create if it doesn't exist
         const discordId = message.author.id;
