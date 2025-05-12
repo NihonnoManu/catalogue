@@ -67,7 +67,7 @@ export async function setupDiscordBot() {
         console.error('Error handling command:', error);
         await message.reply('Sorry, there was an error processing your command. Please try again later.');
       }
-    }else if (lowercase.startsWith('te odio')) {
+    }else if (lowercase.startsWith('te odio') || lowercase.startsWith('...te odio')) {
       try {
         // Get user from database or create if it doesn't exist
         const discordId = message.author.id;
@@ -85,8 +85,6 @@ export async function setupDiscordBot() {
 		  let teodio = ["Me gustas","Me encantas","Daisuki","d)","Te quiero","Me apeteces"]
 
 		  let rdm = Math.floor(Math.random() * (5 - 0 + 1) + 0);
-
-		  console.log(user.id=='2')
 		  
 		  if(rdm==3 && user.id=='2')
 			response +=`**De rodillas**\n`;
@@ -97,7 +95,7 @@ export async function setupDiscordBot() {
 		  
 				
         // Send the response back to Discord
-	console.log(response.length);
+		//console.log(response.length);
         if (response) {
 		if(response.length<2000){
 	          await message.reply(response);
