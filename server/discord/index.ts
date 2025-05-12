@@ -90,7 +90,7 @@ export async function setupDiscordBot() {
 		  
 		  if(rdm==3 && user.id=='2')
 			response +=`**De rodillas**\n`;
-		  if(rdm==3 && user.id=='1')
+		  else if(rdm==3 && user.id=='1')
 			response +=`**¿Un ratito más?**\n`;
 		  else
 			response +=`**${teodio[rdm]}**\n`;
