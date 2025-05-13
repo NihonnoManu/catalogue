@@ -87,6 +87,7 @@ function getHelpMessage(): string {
 \`!all-in\` - Transfer all your points to the other user
 \`!transactions\` - View your recent transactions (last 5)
 \`!rules\` - View special rules
+\`!teodio\` - Show your hate randomly
 \`!help\` - Display this help message
 `;
 }
