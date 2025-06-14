@@ -479,8 +479,8 @@ async function handleRobinHood(userId: number): Promise<string> {
     }
     
     // Calculate half of the other user's balance, rounded down
-    if (otherUser.balance <= 0) {
-      return `${otherUser.displayName} has no points to steal.`;
+    if (otherUser.balance <= 0 || otherUser.balance < user.balance) {
+      return `${otherUser.displayName} has no points to steal or has less points than you.`;
     }
     const amountToSteal = Math.floor(otherUser.balance / 2);
     if (amountToSteal <= 0) {
