@@ -446,7 +446,7 @@ async function getTeOdioMessage(user): Promise<string> {
 }
 
 /**
- * Create a function to steal half of the other user's points in case of not having done a transaction in the last 48 hours.
+ * Create a function to steal half of the other user's points in case of not having done a transaction in the last 24 hours.
  * This function will be called when the user types !robinhood command. The ID of the user from whom points are being stolen
  * its the ID of the user that's not calling the command.
  * @param userId - The ID of the user who is trying to steal points
@@ -467,15 +467,15 @@ async function handleRobinHood(userId: number): Promise<string> {
       return 'Could not find another user to steal points from.';
     }
     
-    // Check if the other user has made a transaction in the last 48 hours
+    // Check if the other user has made a transaction in the last 24 hours
     const lastTransaction = await db.query.transactions.findFirst({
       where: eq(schema.transactions.receiverId, otherUser.id),
       orderBy: [desc(schema.transactions.createdAt)],
       limit: 1
     });
     
-    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 48 * 60 * 60 * 1000) {
-      return `${otherUser.displayName} has made a transaction in the last 48 hours. You cannot steal points right now.`;
+    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000) {
+      return `${otherUser.displayName} has made a transaction in the last 24 hours. You cannot steal points right now.`;
     }
     
     // Calculate half of the other user's balance, rounded down
@@ -510,7 +510,7 @@ async function handleRobinHood(userId: number): Promise<string> {
     });
     
     let message = '**Robin hood has made an appearance!**\n\n';
-    message += `${amountToSteal} MP has been stolen form ${otherUser}\n\n`;
+    message += `${amountToSteal} MP has been stolen form ${otherUser.displayName}\n\n`;
     
     return message;
   } catch (error) {
