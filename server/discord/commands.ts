@@ -216,8 +216,8 @@ async function handleBargain(userId: number, itemSlug: string, offeredPrice: num
     }
     
     // Check if the offered price is reasonable (e.g., not too low)
-    if (offeredPrice < item.price * 0.5) {
-      return `Offered price is too low. Minimum price is ${Math.ceil(item.price * 0.5)} minipoints.`;
+    if (offeredPrice < 1) {
+      return `Offered price is too low. Minimum price is 1 minipoint.`;
     }
     
     // Check if the user has enough balance

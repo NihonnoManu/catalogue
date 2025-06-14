@@ -389,10 +389,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             
             // Check if the price is reasonable
-            if (offeredPrice < itemToBargain.price * 0.5) {
+            if (offeredPrice < 1) {
               response = {
                 type: "error",
-                content: `Offered price is too low. The minimum acceptable price is ${Math.ceil(itemToBargain.price * 0.5)} points.`
+                content: `Offered price is too low. The minimum acceptable price is 1 minipoint.`
               };
               break;
             }
