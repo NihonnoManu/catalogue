@@ -469,12 +469,12 @@ async function handleRobinHood(userId: number): Promise<string> {
     
     // Check if the other user has made a transaction in the last 24 hours
     const lastTransaction = await db.query.transactions.findFirst({
-      where: eq(schema.transactions.receiverId, otherUser.id),
+      where: eq(schema.transactions.senderId, otherUser.id),
       orderBy: [desc(schema.transactions.createdAt)],
       limit: 1
     });
     
-    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000) {
+    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 23 * 60 * 60 * 1000) {
       return `${otherUser.displayName} has made a transaction in the last 24 hours. You cannot steal points right now.`;
     }
     
