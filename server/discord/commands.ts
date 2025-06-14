@@ -91,6 +91,7 @@ function getHelpMessage(): string {
 \`!transactions\` - View your recent transactions (last 5)
 \`!rules\` - View special rules
 \`!teodio\` - Show your hate randomly
+\`!robinhood\` - Steal half of the other user's points if they haven't made a transaction in the last 24 hours
 \`!help\` - Display this help message
 `;
 }
@@ -180,7 +181,7 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       const isOutgoing = tx.senderId === userId;
       const otherParty = isOutgoing ? tx.receiver.displayName : tx.sender.displayName;
       const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
-      const itemName = tx.item ? tx.item.name : 'Direct transfer';
+      const itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
       const date = new Date(tx.createdAt).toLocaleDateString();
 
 
