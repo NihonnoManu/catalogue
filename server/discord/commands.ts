@@ -441,3 +441,77 @@ async function getTeOdioMessage(user): Promise<string> {
 
   return message;
 }
+
+/**
+ * Create a function to steal half of the other user's points in case of not having done a transaction in the last 48 hours.
+ * This function will be called when the user types !robinhood command. The ID of the user from whom points are being stolen
+ * its the ID of the user that's not calling the command.
+ * @param userId - The ID of the user who is trying to steal points
+ * @return A message indicating the result of the operation
+ * */
+async function handleRobinHood(userId: number): Promise<string> {
+  try {
+    // Get the user who is trying to steal points
+    const user = await storage.getUserById(userId);
+    if (!user) {
+      return 'User not found';
+    }
+    
+    // Get the other user (the one from whom points will be stolen)
+    const allUsers = await storage.getAllUsers();
+    const otherUser = allUsers.find(u => u.id !== userId);
+    if (!otherUser) {
+      return 'Could not find another user to steal points from.';
+    }
+    
+    // Check if the other user has made a transaction in the last 48 hours
+    const lastTransaction = await db.query.transactions.findFirst({
+      where: eq(schema.transactions.receiverId, otherUser.id),
+      orderBy: [desc(schema.transactions.createdAt)],
+      limit: 1
+    });
+    
+    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 48 * 60 * 60 * 1000) {
+      return `${otherUser.displayName} has made a transaction in the last 48 hours. You cannot steal points right now.`;
+    }
+    
+    // Calculate half of the other user's balance, rounded down
+    if (otherUser.balance <= 0) {
+      return `${otherUser.displayName} has no points to steal.`;
+    }
+    const amountToSteal = Math.floor(otherUser.balance / 2);
+    if (amountToSteal <= 0) {
+      return `${otherUser.displayName} has no points to steal.`;
+    }
+
+    // Start a database transaction for consistency
+    await db.transaction(async (tx) => {
+      // Update the other user's balance
+      await tx.update(schema.users)
+        .set({ balance: otherUser.balance - amountToSteal })
+        .where(eq(schema.users.id, otherUser.id));
+      
+      // Update the stealing user's balance
+      await tx.update(schema.users)
+        .set({ balance: user.balance + amountToSteal })
+        .where(eq(schema.users.id, user.id));
+      
+      // Create a transaction record for the theft
+      await tx.insert(schema.transactions)
+        .values({
+          senderId: otherUser.id,
+          receiverId: user.id,
+          amount: -amountToSteal,
+          itemId: null // No item involved in this case
+        });
+    });
+    
+    let message = '**Robin hood has made an appearance!**\n\n';
+    message += `${amountToSteal} MP has been stolen form ${otherUser}\n\n`;
+    
+    return message;
+  } catch (error) {
+    console.error('Transaction error:', error);
+    return `Failed to get transaction history: ${error instanceof Error ? error.message : 'An error occurred'}`;
+  }
+}
