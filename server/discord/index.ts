@@ -29,6 +29,10 @@ export async function setupDiscordBot() {
     // Ignore messages from bots to prevent loops
     if (message.author.bot) return;
 
+
+	let lowercase = message.content.toLowerCase();
+	
+
     // Check if this is a command (starts with !)
     if (message.content.startsWith('!')) {
       try {
@@ -47,6 +51,51 @@ export async function setupDiscordBot() {
         
         // Send the response back to Discord
 	console.log(response.length);
+        if (response) {
+		if(response.length<2000){
+	          await message.reply(response);
+		}else{
+			let chunks = splitMessage(response)
+			for (let i = 0; i < chunks.length; i++){
+                                console.log(chunks[i]);
+                                await message.reply(chunks[i]);
+                        }
+		}
+
+        }
+      } catch (error) {
+        console.error('Error handling command:', error);
+        await message.reply('Sorry, there was an error processing your command. Please try again later.');
+      }
+    }else if (lowercase.startsWith('te odio') || lowercase.startsWith('...te odio')) {
+      try {
+        // Get user from database or create if it doesn't exist
+        const discordId = message.author.id;
+        let user = await storage.getUserByDiscordId(discordId);
+        
+        if (!user) {
+          console.log(`User with Discord ID ${discordId} not found in database. The command will not be processed.`);
+          await message.reply("You don't seem to be registered in our system. Please contact an administrator.");
+          return;
+        }
+      
+		  let response = '**Traducción**\n\n';
+		  response += `Lo que ${user.displayName} intenta decir es:\n`;
+
+		  let teodio = ["Me gustas","Me encantas","Daisuki","d)","Te quiero","Me apeteces"]
+
+		  let rdm = Math.floor(Math.random() * (5 - 0 + 1) + 0);
+		  
+		  if(rdm==3 && user.id=='2')
+			response +=`**De rodillas**\n`;
+		  else if(rdm==3 && user.id=='1')
+			response +=`**¿Un ratito más?**\n`;
+		  else
+			response +=`**${teodio[rdm]}**\n`;
+		  
+				
+        // Send the response back to Discord
+		//console.log(response.length);
         if (response) {
 		if(response.length<2000){
 	          await message.reply(response);

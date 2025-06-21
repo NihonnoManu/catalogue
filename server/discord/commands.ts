@@ -2,7 +2,7 @@ import { MessageCreateOptions } from 'discord.js';
 import { storage } from '../storage';
 import { User, CatalogItem } from '@shared/schema';
 import { db } from '@db';
-import { eq, or, desc } from 'drizzle-orm';
+import { eq, or, desc, and } from 'drizzle-orm';
 import * as schema from '@shared/schema';
 import { BargainOffer } from '../routes';
 
@@ -24,6 +24,7 @@ export async function handleCommand(commandText: string, user: User): Promise<st
       
       case '!catalogue':
       case '!catalog':
+      case '!catalogo':
         return await getCatalogueMessage();
       
       case '!buy':
@@ -57,6 +58,16 @@ export async function handleCommand(commandText: string, user: User): Promise<st
 
       case '!rules':
         return await getRulesMessage();
+        
+      case '!robinhood':
+        return await handleRobinHood(user.id);
+
+      case '!steal':
+        return await handleSteal(user.id);
+
+      case '!teodio':
+      case 'teodio':
+	return await getTeOdioMessage(user);
       
       default:
         return `Unknown command: ${command}. Try !help for a list of commands.`;
@@ -83,6 +94,9 @@ function getHelpMessage(): string {
 \`!all-in\` - Transfer all your points to the other user
 \`!transactions\` - View your recent transactions (last 5)
 \`!rules\` - View special rules
+\`!teodio\` - Show your hate randomly
+\`!robinhood\` - Steal half of the other user's points if they haven't made a transaction in the last 24 hours
+\`!steal\` - Try to steal a point from the other user with a 66% chance of success. If you fail, you will give a point to the other user instead. You can only use this command once every 2 hours.
 \`!help\` - Display this help message
 `;
 }
@@ -172,7 +186,17 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       const isOutgoing = tx.senderId === userId;
       const otherParty = isOutgoing ? tx.receiver.displayName : tx.sender.displayName;
       const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
-      const itemName = tx.item ? tx.item.name : 'Direct transfer';
+      let itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
+
+      console.log(tx);
+
+      if( tx.itemId == "1001" ) {
+        itemName = 'Steal';
+        console.log("Supuestamente le estoy diciendo que itenName es Steal");
+        console.log(tx);
+      }
+
+      
       const date = new Date(tx.createdAt).toLocaleDateString();
 
 
@@ -211,8 +235,8 @@ async function handleBargain(userId: number, itemSlug: string, offeredPrice: num
     }
     
     // Check if the offered price is reasonable (e.g., not too low)
-    if (offeredPrice < item.price * 0.5) {
-      return `Offered price is too low. Minimum price is ${Math.ceil(item.price * 0.5)} minipoints.`;
+    if (offeredPrice < 1) {
+      return `Offered price is too low. Minimum price is 1 minipoint.`;
     }
     
     // Check if the user has enough balance
@@ -406,3 +430,225 @@ async function getRulesMessage(): Promise<string> {
   return message;
 }
 
+/**
+ * Generate te odio message
+ */
+
+
+async function getTeOdioMessage(user): Promise<string> {
+  
+  let message = '**Traducción**\n\n';
+  message += `Lo que ${user.displayName} intenta decir es:\n`;
+
+  let teodio = ["Me gustas","Me encantas","Daisuki","d)","Te quiero","Me apeteces"]
+
+  let rdm = Math.floor(Math.random() * (5 - 0 + 1) + 0);
+
+  console.log(user.id=='2')
+  
+  if(rdm==3 && user.id=='2')
+    message +=`**De rodillas**\n`;
+  if(rdm==3 && user.id=='1')
+    message +=`**¿Un ratito más?**\n`;
+  else
+    message +=`**${teodio[rdm]}**\n`;
+  
+//  rules.forEach(rule => {
+//   message += `**${rule.name}**\n`;
+//    message += `${rule.description}\n`;
+//  });
+
+  return message;
+}
+
+/**
+ * Create a function to steal half of the other user's points in case of not having done a transaction in the last 24 hours.
+ * This function will be called when the user types !robinhood command. The ID of the user from whom points are being stolen
+ * its the ID of the user that's not calling the command.
+ * @param userId - The ID of the user who is trying to steal points
+ * @return A message indicating the result of the operation
+ * */
+async function handleRobinHood(userId: number): Promise<string> {
+  try {
+    // Get the user who is trying to steal points
+    const user = await storage.getUserById(userId);
+    if (!user) {
+      return 'User not found';
+    }
+    
+    // Get the other user (the one from whom points will be stolen)
+    const allUsers = await storage.getAllUsers();
+    const otherUser = allUsers.find(u => u.id !== userId);
+    if (!otherUser) {
+      return 'Could not find another user to steal points from.';
+    }
+    
+    // Check if the other user has made a transaction in the last 24 hours
+    const lastTransaction = await db.query.transactions.findFirst({
+      where: eq(schema.transactions.senderId, otherUser.id),
+      orderBy: [desc(schema.transactions.createdAt)],
+      limit: 1
+    });
+    
+    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 23 * 60 * 60 * 1000) { // 23 to compensate for database time precision
+      return `${otherUser.displayName} has made a transaction in the last 24 hours. You cannot steal points right now.`;
+    }
+    
+    // Calculate half of the other user's balance, rounded down
+    if (otherUser.balance <= 0 || otherUser.balance < user.balance) {
+      return `${otherUser.displayName} has no points to steal or has less points than you.`;
+    }
+    const amountToSteal = Math.floor(otherUser.balance / 2);
+    if (amountToSteal <= 0) {
+      return `${otherUser.displayName} has no points to steal.`;
+    }
+
+    // Start a database transaction for consistency
+    await db.transaction(async (tx) => {
+      // Update the other user's balance
+      await tx.update(schema.users)
+        .set({ balance: otherUser.balance - amountToSteal })
+        .where(eq(schema.users.id, otherUser.id));
+      
+      // Update the stealing user's balance
+      await tx.update(schema.users)
+        .set({ balance: user.balance + amountToSteal })
+        .where(eq(schema.users.id, user.id));
+      
+      // Create a transaction record for the theft
+      await tx.insert(schema.transactions)
+        .values({
+          senderId: otherUser.id,
+          receiverId: user.id,
+          amount: amountToSteal,
+          itemId: null // No item involved in this case
+        });
+    });
+    
+    let message = '**Robin hood has made an appearance!**\n\n';
+    message += `${amountToSteal} MP has been stolen from ${otherUser.displayName}\n\n`;
+    
+    return message;
+  } catch (error) {
+    console.error('Transaction error:', error);
+    return `Failed to get transaction history: ${error instanceof Error ? error.message : 'An error occurred'}`;
+  }
+}
+
+
+/**
+ * Create a function to try and steal a point from the other user with a 66% chance of success.
+ * If the user fails they will, instead, give a point to the other user.
+ * You can only use this command once every 2 hours, this will be checked by looking at the transactions table.
+ * The item id will be "1001" for this transaction, so you can check it with it later.
+ * This function will be called when the user types !steal command.
+ * @param userId - The ID of the user who is trying to steal points
+ * @return A message indicating the result of the operation.
+ * */
+async function handleSteal(userId: number): Promise<string> {
+  try {
+    // Get the user who is trying to steal points
+    const user = await storage.getUserById(userId);
+    if (!user) {
+      return 'User not found';
+    }
+    
+    // Get the other user (the one from whom points will be stolen)
+    const allUsers = await storage.getAllUsers();
+    const otherUser = allUsers.find(u => u.id !== userId);
+    if (!otherUser) {
+      return 'Could not find another user to steal points from.';
+    }
+    
+    // Check if the user has used this command in the last 2 hours by looking at the last transaction with itemId "1001" made by the userId, if it exists.
+    const lastStealTransaction = await db.query.transactions.findFirst({
+      where: and(eq(schema.transactions.itemId, '1001'),
+      eq(schema.transactions.receiverId, userId),
+      ),
+      orderBy: [desc(schema.transactions.createdAt)],
+      limit: 1
+    });
+
+    // If the last steal transaction exists and was made less than 2 hours ago, return an error message 
+    if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 1 * 60 * 60 * 1000) {
+      return 'You can only use this command once every 2 hours.';
+    }
+    
+    // Generate a random number to determine success (66% chance)
+    const success = Math.random() < 0.66;
+    
+    let amountToSteal = 1;
+    
+    if (success) {
+      // Steal a point from the other user
+      if (otherUser.balance <= 0 || otherUser.balance < amountToSteal) {
+        return `${otherUser.displayName} has no points to steal.`;
+      }
+      
+      // Start a database transaction for consistency
+      await db.transaction(async (tx) => {
+        // Update the other user's balance
+        await tx.update(schema.users)
+          .set({ balance: otherUser.balance - amountToSteal })
+          .where(eq(schema.users.id, otherUser.id));
+        
+        // Update the stealing user's balance
+        await tx.update(schema.users)
+          .set({ balance: user.balance + amountToSteal })
+          .where(eq(schema.users.id, user.id));
+        
+        // Create a transaction record for the theft
+        await tx.insert(schema.transactions)
+          .values({
+            senderId: otherUser.id,
+            receiverId: user.id,
+            amount: amountToSteal,
+            itemId: '1001' // Special item ID for this transaction
+          });
+      });
+        
+      let message = '**You stole a point!**\n\n';
+      message += `${amountToSteal} MP has been stolen from ${otherUser.displayName}\n\n`;
+
+
+      return message;
+
+    } else {
+      // Give a point to the other user instead
+      if (user.balance <= 0) {
+        return 'You have no points to give.';
+      }
+      
+      // Start a database transaction for consistency
+      await db.transaction(async (tx) => {
+        // Update the other user's balance
+        await tx.update(schema.users)
+          .set({ balance: otherUser.balance + amountToSteal })
+          .where(eq(schema.users.id, otherUser.id));
+        
+        // Update the stealing user's balance
+        await tx.update(schema.users)
+          .set({ balance: user.balance - amountToSteal })
+          .where(eq(schema.users.id, user.id));
+        
+        // Create a transaction record for the theft
+        await tx.insert(schema.transactions)
+          .values({
+            senderId: user.id,
+            receiverId: otherUser.id,
+            amount: amountToSteal,
+            itemId: '1001' // Special item ID for this transaction
+          });
+      });
+      
+      let message = '**You failed to steal a point!**\n\n';
+      message += `You gave ${amountToSteal} MP to ${otherUser.displayName}\n\n`;
+      
+      return message;
+    }
+  }
+  catch (error) {
+    console.error('Steal error:', error);
+    return `Failed to steal points: ${error instanceof Error ? error.message : 'An error occurred'}`;
+  }
+}
