@@ -187,6 +187,9 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       const otherParty = isOutgoing ? tx.receiver.displayName : tx.sender.displayName;
       const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
       const itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
+      if( tx.itemId === '1001' ) {
+        tx.item.name = 'Steal';
+      }
       const date = new Date(tx.createdAt).toLocaleDateString();
 
 
@@ -510,7 +513,7 @@ async function handleRobinHood(userId: number): Promise<string> {
         .values({
           senderId: otherUser.id,
           receiverId: user.id,
-          amount: -amountToSteal,
+          amount: amountToSteal,
           itemId: null // No item involved in this case
         });
     });
@@ -594,7 +597,7 @@ async function handleSteal(userId: number): Promise<string> {
           .values({
             senderId: otherUser.id,
             receiverId: user.id,
-            amount: -amountToSteal,
+            amount: amountToSteal,
             itemId: '1001' // Special item ID for this transaction
           });
       });
