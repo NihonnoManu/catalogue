@@ -190,7 +190,7 @@ async function getTransactionsMessage(userId: number): Promise<string> {
 
       console.log(tx);
 
-      if( tx.itemId === '1001' ) {
+      if( tx.itemId == "1001" ) {
         itemName = 'Steal';
         console.log("Supuestamente le estoy diciendo que itenName es Steal");
         console.log(tx);
