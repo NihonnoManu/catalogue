@@ -475,7 +475,7 @@ async function handleRobinHood(userId: number): Promise<string> {
       limit: 1
     });
     
-    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 23 * 60 * 60 * 1000) {
+    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 23 * 60 * 60 * 1000) { // 23 to compensate for database time precision
       return `${otherUser.displayName} has made a transaction in the last 24 hours. You cannot steal points right now.`;
     }
     
@@ -517,5 +517,122 @@ async function handleRobinHood(userId: number): Promise<string> {
   } catch (error) {
     console.error('Transaction error:', error);
     return `Failed to get transaction history: ${error instanceof Error ? error.message : 'An error occurred'}`;
+  }
+}
+
+
+/**
+ * Create a function to try and steal a point from the other user with a 66% chance of success.
+ * If the user fails they will, instead, give a point to the other user.
+ * You can only use this command once every 2 hours, this will be checked by looking at the transactions table.
+ * The item id will be "1001" for this transaction, so you can check it with it later.
+ * This function will be called when the user types !steal command.
+ * @param userId - The ID of the user who is trying to steal points
+ * @return A message indicating the result of the operation.
+ * */
+async function handleSteal(userId: number): Promise<string> {
+  try {
+    // Get the user who is trying to steal points
+    const user = await storage.getUserById(userId);
+    if (!user) {
+      return 'User not found';
+    }
+    
+    // Get the other user (the one from whom points will be stolen)
+    const allUsers = await storage.getAllUsers();
+    const otherUser = allUsers.find(u => u.id !== userId);
+    if (!otherUser) {
+      return 'Could not find another user to steal points from.';
+    }
+    
+    // Check if the user has used this command in the last 2 hours by looking at the last transaction with itemId "1001" made by the userId, if it exists.
+    const lastStealTransaction = await db.query.transactions.findFirst({
+      where: eq(schema.transactions.receiverId, userId),
+      and: eq(schema.transactions.itemId, '1001'),
+      orderBy: [desc(schema.transactions.createdAt)],
+      limit: 1
+    });
+
+    
+    if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 2 * 60 * 60 * 1000) {
+      return 'You can only use this command once every 2 hours.';
+    }
+    
+    // Generate a random number to determine success (66% chance)
+    const success = Math.random() < 0.66;
+    
+    let amountToSteal = 1;
+    
+    if (success) {
+      // Steal a point from the other user
+      if (otherUser.balance <= 0 || otherUser.balance < amountToSteal) {
+        return `${otherUser.displayName} has no points to steal.`;
+      }
+      
+      // Start a database transaction for consistency
+      await db.transaction(async (tx) => {
+        // Update the other user's balance
+        await tx.update(schema.users)
+          .set({ balance: otherUser.balance - amountToSteal })
+          .where(eq(schema.users.id, otherUser.id));
+        
+        // Update the stealing user's balance
+        await tx.update(schema.users)
+          .set({ balance: user.balance + amountToSteal })
+          .where(eq(schema.users.id, user.id));
+        
+        // Create a transaction record for the theft
+        await tx.insert(schema.transactions)
+          .values({
+            senderId: otherUser.id,
+            receiverId: user.id,
+            amount: -amountToSteal,
+            itemId: '1001' // Special item ID for this transaction
+          });
+      });
+        
+      let message = '**You stole a point!**\n\n';
+      message += `${amountToSteal} MP has been stolen form ${otherUser.displayName}\n\n`;
+
+
+      return message;
+
+    } else {
+      // Give a point to the other user instead
+      if (user.balance <= 0) {
+        return 'You have no points to give.';
+      }
+      
+      // Start a database transaction for consistency
+      await db.transaction(async (tx) => {
+        // Update the other user's balance
+        await tx.update(schema.users)
+          .set({ balance: otherUser.balance + amountToSteal })
+          .where(eq(schema.users.id, otherUser.id));
+        
+        // Update the stealing user's balance
+        await tx.update(schema.users)
+          .set({ balance: user.balance - amountToSteal })
+          .where(eq(schema.users.id, user.id));
+        
+        // Create a transaction record for the theft
+        await tx.insert(schema.transactions)
+          .values({
+            senderId: user.id,
+            receiverId: otherUser.id,
+            amount: amountToSteal,
+            itemId: '1001' // Special item ID for this transaction
+          });
+      });
+      
+      let message = '**You failed to steal a point!**\n\n';
+      message += `You gave ${amountToSteal} MP to ${otherUser.displayName}\n\n`;
+      
+      return message;
+    }
+  }
+  catch (error) {
+    console.error('Steal error:', error);
+    return `Failed to steal points: ${error instanceof Error ? error.message : 'An error occurred'}`;
   }
 }
