@@ -92,6 +92,7 @@ function getHelpMessage(): string {
 \`!rules\` - View special rules
 \`!teodio\` - Show your hate randomly
 \`!robinhood\` - Steal half of the other user's points if they haven't made a transaction in the last 24 hours
+\`!steal\` - Try to steal a point from the other user with a 66% chance of success. If you fail, you will give a point to the other user instead. You can only use this command once every 2 hours.
 \`!help\` - Display this help message
 `;
 }
