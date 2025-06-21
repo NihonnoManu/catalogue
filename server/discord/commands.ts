@@ -186,12 +186,11 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       const isOutgoing = tx.senderId === userId;
       const otherParty = isOutgoing ? tx.receiver.displayName : tx.sender.displayName;
       const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
-      const itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
-      
-      console.log(tx);
 
-      if( tx.item_id === '1001' ) {
-        tx.item.name = 'Steal';
+      if( tx.itemId === '1001' ) {
+        const itemName = 'Steal';
+      }else{
+        const itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
       }
       const date = new Date(tx.createdAt).toLocaleDateString();
 
@@ -564,8 +563,6 @@ async function handleSteal(userId: number): Promise<string> {
       orderBy: [desc(schema.transactions.createdAt)],
       limit: 1
     });
-
-     console.log(lastStealTransaction);  
 
     // If the last steal transaction exists and was made less than 2 hours ago, return an error message 
     if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 1 * 60 * 60 * 1000) {
