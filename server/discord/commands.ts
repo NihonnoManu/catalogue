@@ -552,14 +552,17 @@ async function handleSteal(userId: number): Promise<string> {
     
     // Check if the user has used this command in the last 2 hours by looking at the last transaction with itemId "1001" made by the userId, if it exists.
     const lastStealTransaction = await db.query.transactions.findFirst({
-      where: eq(schema.transactions.receiverId, userId),
-      and: eq(schema.transactions.itemId, '1001'),
+      where: and(eq(schema.transactions.itemId, '1001'),
+      eq(schema.transactions.receiverId, userId),
+      ),
       orderBy: [desc(schema.transactions.createdAt)],
       limit: 1
     });
 
-    
-    if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 2 * 60 * 60 * 1000) {
+     console.log(lastStealTransaction);  
+     
+    // If the last steal transaction exists and was made less than 2 hours ago, return an error message 
+    if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 1 * 60 * 60 * 1000) {
       return 'You can only use this command once every 2 hours.';
     }
     
