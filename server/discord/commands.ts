@@ -199,10 +199,10 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       // Format the transaction date/time
       const transactionDate = new Date(tx.createdAt);
       const dateStr = transactionDate.toLocaleDateString("es-ES", {
-        timeZone: "UTC"
+        timeZone: "UTC" // Use UTC to avoid timezone issues with the Database timestamps
       });;
       const timeStr = transactionDate.toLocaleTimeString(["es-ES"], { 
-        timeZone: "UTC",
+        timeZone: "UTC", // Use UTC to avoid timezone issues with the Database timestamps
         hour: '2-digit', 
         minute: '2-digit' 
       });
