@@ -486,7 +486,7 @@ async function handleRobinHood(userId: number): Promise<string> {
       limit: 1
     });
     
-    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 23 * 60 * 60 * 1000) { // 23 to compensate for database time precision
+    if (lastTransaction && new Date(lastTransaction.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000) {
       return `${otherUser.displayName} has made a transaction in the last 24 hours. You cannot steal points right now.`;
     }
     
@@ -566,7 +566,7 @@ async function handleSteal(userId: number): Promise<string> {
     });
 
     // If the last steal transaction exists and was made less than 2 hours ago, return an error message 
-    if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 1 * 60 * 60 * 1000) {
+    if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 2 * 60 * 60 * 1000) {
       return 'You can only use this command once every 2 hours.';
     }
     
