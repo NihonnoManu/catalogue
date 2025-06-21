@@ -516,7 +516,7 @@ async function handleRobinHood(userId: number): Promise<string> {
     });
     
     let message = '**Robin hood has made an appearance!**\n\n';
-    message += `${amountToSteal} MP has been stolen form ${otherUser.displayName}\n\n`;
+    message += `${amountToSteal} MP has been stolen from ${otherUser.displayName}\n\n`;
     
     return message;
   } catch (error) {
@@ -600,7 +600,7 @@ async function handleSteal(userId: number): Promise<string> {
       });
         
       let message = '**You stole a point!**\n\n';
-      message += `${amountToSteal} MP has been stolen form ${otherUser.displayName}\n\n`;
+      message += `${amountToSteal} MP has been stolen from ${otherUser.displayName}\n\n`;
 
 
       return message;
