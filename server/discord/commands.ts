@@ -198,8 +198,14 @@ async function getTransactionsMessage(userId: number): Promise<string> {
 
       // Format the transaction date/time
       const transactionDate = new Date(tx.createdAt);
-      const dateStr = transactionDate.toLocaleDateString();
-      const timeStr = transactionDate.toLocaleTimeString(["es-ES"], { hour: '2-digit', minute: '2-digit' });
+      const dateStr = transactionDate.toLocaleDateString("es-ES", {
+        timeZone: "Europe/Madrid"
+      });;
+      const timeStr = transactionDate.toLocaleTimeString(["es-ES"], { 
+        timeZone: "Europe/Madrid",
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
 
       message += `**${itemName}** (${dateStr} ${timeStr})\n`;
       message += `${isOutgoing ? 'To' : 'From'}: ${otherParty}\n`;
