@@ -24,6 +24,7 @@ export async function handleCommand(commandText: string, user: User): Promise<st
       
       case '!catalogue':
       case '!catalog':
+      case '!catalogo':
         return await getCatalogueMessage();
       
       case '!buy':
@@ -60,6 +61,9 @@ export async function handleCommand(commandText: string, user: User): Promise<st
         
       case '!robinhood':
         return await handleRobinHood(user.id);
+
+      case '!steal':
+        return await handleSteal(user.id);
 
       case '!teodio':
       case 'teodio':
