@@ -2,7 +2,7 @@ import { MessageCreateOptions } from 'discord.js';
 import { storage } from '../storage';
 import { User, CatalogItem } from '@shared/schema';
 import { db } from '@db';
-import { eq, or, desc } from 'drizzle-orm';
+import { eq, or, desc, and } from 'drizzle-orm';
 import * as schema from '@shared/schema';
 import { BargainOffer } from '../routes';
 
@@ -560,7 +560,7 @@ async function handleSteal(userId: number): Promise<string> {
     });
 
      console.log(lastStealTransaction);  
-     
+
     // If the last steal transaction exists and was made less than 2 hours ago, return an error message 
     if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 1 * 60 * 60 * 1000) {
       return 'You can only use this command once every 2 hours.';
