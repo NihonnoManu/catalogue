@@ -188,12 +188,8 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
       let itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
 
-      console.log(tx);
-
       if( tx.itemId == "1001" ) {
         itemName = 'Steal';
-        console.log("Supuestamente le estoy diciendo que itenName es Steal");
-        console.log(tx);
       }
 
       
