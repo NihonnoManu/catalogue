@@ -186,12 +186,13 @@ async function getTransactionsMessage(userId: number): Promise<string> {
       const isOutgoing = tx.senderId === userId;
       const otherParty = isOutgoing ? tx.receiver.displayName : tx.sender.displayName;
       const amountDisplay = isOutgoing ? `-${tx.amount}` : `+${tx.amount}`;
+      let itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
+
 
       if( tx.itemId === '1001' ) {
-        const itemName = 'Steal';
-      }else{
-        const itemName = tx.item ? tx.item.name : 'Direct transfer (All-in or Robin Hood)';
+        itemName = 'Steal';
       }
+      
       const date = new Date(tx.createdAt).toLocaleDateString();
 
 
