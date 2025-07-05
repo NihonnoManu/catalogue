@@ -800,10 +800,7 @@ export async function getActiveMissionForUser(userId: number): Promise<string> {
         eq(schema.activeMissions.userId, userId),
         gte(schema.activeMissions.createdAt, today),
         lt(schema.activeMissions.createdAt, tomorrow)
-      ),
-      with: {
-        mission: true // Include the mission details
-      }
+      )
     });
     
     console.log("Active Mission: ", activeMission);
