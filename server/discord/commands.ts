@@ -886,7 +886,7 @@ export async function completeMission(userId: number): Promise<string> {
       });
     
     if (otherUser) {
-      message = `**Mission Completed!**\n${otherUser.displayName},\n ${user.display_name} has completed their mission: \n**${mission.description}**.\n Please use !complete or !fail to respond to the completion.`;
+      message = `**Mission Completed!**\n${otherUser.displayName},\n ${user.displayName} has completed their mission: \n**${mission.description}**.\n Please use !complete or !fail to respond to the completion.`;
       return message;
     } else {
       return 'Could not find the other user to notify about your mission completion.';
