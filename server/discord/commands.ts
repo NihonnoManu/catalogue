@@ -716,7 +716,6 @@ function addMissionToPool(userId: number, missionName: string, description: stri
 
         // Create a new mission
         const newMission: Mission = {
-          id: Date.now(), // Simple ID generation, could be improved
           name: missionName,
           description,
           reward: 1 // Default reward for completing a mission
