@@ -783,43 +783,52 @@ export async function assignRandomMissionToUser(userId: number): Promise<string>
 * This function will show the assigned mission to the user and it's status (completed or not) when they type !mission command.
 * The user can complete the mission by typing !completemission [missionId] command.
 */
+
+// Función para obtener la misión activa del usuario
 export async function getActiveMissionForUser(userId: number): Promise<string> {
   try {
-    // Get the active mission for the user, checking if there is an active mission assigned to them for today's date.
-    // This will return the first active mission for the user, including the mission details.
+    // Definir las fechas para hoy y mañana
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    let message
+    let message;
 
-    console.log("Fetching active mission for user ID:", userId);
+    // Consulta la misión activa para el usuario
     const activeMission = await db.query.activeMissions.findFirst({
       where: and(
         eq(schema.activeMissions.userId, userId),
-        gte(schema.activeMissions.createdAt, today),
-        lt(schema.activeMissions.createdAt, tomorrow)
-      )
+        gte(schema.activeMissions.createdAt, today), // Fecha de inicio (hoy)
+        lt(schema.activeMissions.createdAt, tomorrow) // Fecha de fin (mañana)
+      ),
     });
-    
-    console.log("Active Mission: ", activeMission);
-    if (!activeMission && activeMission.mission) {
-      console.log("AsignacióN");
-      assignRandomMissionToUser(userId);
+
+    // Si no hay misión activa, asignar una nueva misión
+    if (!activeMission) {
+      await assignRandomMissionToUser(userId); // Asignar una misión nueva
       message = 'You had no active missions assigned for today. A new mission has been assigned to you. Use !mission to check it.';
-    }else{
-      console.log("Mostración");
-      const mission = activeMission.mission;
-      message = `**Active Mission**\nName: ${mission.name}\nDescription: ${mission.description}\nReward: ${mission.reward} MP of discount\nStatus: ${activeMission.isCompleted ? 'Completed' : 'In Progress'}`;
-      return message;
+    } else {
+      // Obtener los detalles de la misión usando el `mission_id`
+      const mission = await db.query.missions.findFirst({
+        where: eq(schema.missions.id, activeMission.missionId),
+      });
+
+      if (!mission) {
+        message = 'Mission details not found.';
+      } else {
+        // Construir el mensaje con la misión activa y los detalles
+        message = `**Active Mission**\nName: ${mission.name}\nDescription: ${mission.description}\nReward: ${mission.reward} MP of discount\nStatus: ${activeMission.isCompleted ? 'Completed' : 'In Progress'}`;
+      }
     }
-    
+
+    return message;
   } catch (error) {
     console.error('Error fetching active mission:', error);
     return `Failed to fetch active mission: ${error instanceof Error ? error.message : 'An error occurred'}`;
   }
 }
+
 
 
 
