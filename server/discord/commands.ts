@@ -89,6 +89,18 @@ export async function handleCommand(commandText: string, user: User): Promise<st
       case '!mission':
         // Get the active mission for the user
         return await getActiveMissionForUser(user.id);
+
+      case '!completemission':
+        // Complete the mission for the user
+        return await completeMission(user.id);
+      
+        case "!complete":
+        // Complete the mission for the other user  
+        return await handleMissionCompletion(user.id, true);
+
+      case "!fail":
+        // Fail the mission for the other user
+        return await handleMissionCompletion(user.id, false);
         
       default:
         return `Unknown command: ${command}. Try !help for a list of commands.`;
@@ -818,7 +830,7 @@ export async function getActiveMissionForUser(userId: number): Promise<string> {
         message = 'Mission details not found.';
       } else {
         // Construir el mensaje con la misión activa y los detalles
-        message = `**Active Mission**\nName: ${mission.name}\nDescription: ${mission.description}\nReward: ${mission.reward} MP of discount\nStatus: ${activeMission.isCompleted ? 'Completed' : 'In Progress'}`;
+        message = `**Active Mission**\nName: ${mission.name}\nDescription: ${mission.description}\nReward: ${mission.reward} MP\nStatus: ${activeMission.isCompleted ? 'Completed' : 'In Progress'}`;
       }
     }
 
@@ -829,7 +841,115 @@ export async function getActiveMissionForUser(userId: number): Promise<string> {
   }
 }
 
+/* Function to complete an active mission.
+* This function will be called when the user types !completemission [missionId] command.
+* It will update the isCompleted field to true and send a message to the group so the other user is also notified.
+* The other usser will need to !complete or !fail the mission completion after seeing it.
+* If the other user accepts the mission completion, it will be marked as completed and the user will receive a reward of 1 minipoint.
+* That reward will be updated in the rewards table with the userId.
+* If the other user rejects the mission completion, it won't be marked as completed and the user will need to try again.
+* @param userId - The ID of the user who is completing the mission
+* */
+export async function completeMission(userId: number): Promise<string> {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
 
+    let message;
+
+    // Get the active mission for the user
+    const activeMission = await db.query.activeMissions.findFirst({
+      where: and(
+        eq(schema.activeMissions.userId, userId),        
+        gte(schema.activeMissions.createdAt, today), // Fecha de inicio (hoy)
+        lt(schema.activeMissions.createdAt, tomorrow), // Fecha de fin (mañana)
+        eq(schema.activeMissions.isCompleted, false)
+      )
+    });
+
+    if (!activeMission) {
+      return 'You have no active mission to complete or it has already been completed.';
+    }
+
+    // Notify the other user about the mission completion
+
+    const allUsers = await storage.getAllUsers();
+    const otherUser = allUsers.find(u => u.id !== userId);
+    
+    if (otherUser) {
+      message = `**Mission Completed!**\n${otherUser.displayName}, ${activeMission.userId.display_name} has completed their mission: **${activeMission.description}**. Please use !complete or !fail to respond to the completion.`;
+      return message;
+    } else {
+      return 'Could not find the other user to notify about your mission completion.';
+    }
+  } catch (error) {
+    console.error('Error completing mission:', error);
+    return `Failed to complete mission: ${error instanceof Error ? error.message : 'An error occurred'}`;
+  }
+}
+
+/**
+ * Function to handle the completion of a mission by the other user.
+ * This function will be called when the other user types !complete or !fail command.
+ * If the other user accepts the mission completion, it will be marked as completed and the user will receive a reward of 1 minipoint.
+ * That reward will be updated in the rewards table with the userId.
+ * If the other user rejects the mission completion, it won't be marked as completed and the user will need to try again.
+ * @param userId - The ID of the user who is completing or failing the mission
+ * @param complete - Whether the other user accepts or fails the mission completion
+ * */
+function handleMissionCompletion(userId: number, complete: boolean): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    let message;
+      // Get the active mission for the user
+      const activeMission = await db.query.activeMissions.findFirst({
+        where: and(
+          eq(schema.activeMissions.userId, userId),        
+          gte(schema.activeMissions.createdAt, today), // Fecha de inicio (hoy)
+          lt(schema.activeMissions.createdAt, tomorrow), // Fecha de fin (mañana)
+          eq(schema.activeMissions.isCompleted, false)
+        )
+      });
+
+      if (!activeMission) {
+        return reject('You have no active mission to complete or it has already been completed.');
+      }
+
+      // Update the mission status based on the user's response
+      if (complete) {
+        // Mark the mission as completed
+        await db.update(schema.activeMissions)
+          .set({ isCompleted: true }).set({ updatedAt: new Date() })
+          .where(eq(schema.activeMissions.id, activeMission.id));
+
+        // Reward the user by updating the rewards table, adding 1 minipoint to the existing value. 
+        await db.update(schema.rewards)
+          .set({ points: schema.rewards.points + 1 })
+          .where(eq(schema.rewards.userId));        
+
+        resolve(`Mission completed successfully! You have been rewarded with 1 minipoint.`);
+      } else {
+        // Mark the mission as failed
+        await db.update(schema.activeMissions)
+          .set({ isCompleted: false }).set({ updatedAt: new Date() })
+          .where(eq(schema.activeMissions.id, activeMission.id));
+
+        resolve(`Mission completion failed. You can try again later.`);
+      }
+    } catch (error) {
+      console.error('Error handling mission completion:', error);
+      reject(`Failed to handle mission completion: ${error instanceof Error ? error.message : 'An error occurred'}`);
+    }
+  });
+}
 
 
   
