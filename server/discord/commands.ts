@@ -902,6 +902,8 @@ export async function completeMission(userId: number): Promise<string> {
 function handleMissionCompletion(userId: number, complete: boolean): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
+    const allUsers = await storage.getAllUsers();
+    const otherUser = allUsers.find(u => u.id !== userId);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -912,7 +914,7 @@ function handleMissionCompletion(userId: number, complete: boolean): Promise<str
       // Get the active mission for the user
       const activeMission = await db.query.activeMissions.findFirst({
         where: and(
-          eq(schema.activeMissions.userId, userId),        
+          eq(schema.activeMissions.userId, otherUser.id),        
           gte(schema.activeMissions.createdAt, today), // Fecha de inicio (hoy)
           lt(schema.activeMissions.createdAt, tomorrow), // Fecha de fin (mañana)
           eq(schema.activeMissions.isCompleted, false)
@@ -932,7 +934,7 @@ function handleMissionCompletion(userId: number, complete: boolean): Promise<str
 
         // Reward the user by updating the rewards table, adding 1 minipoint to the existing value. 
         await db.update(schema.rewards)
-          .set({ points: schema.rewards.points + 1 })
+          .set({ points: 1 })
           .where(eq(schema.rewards.userId));        
 
         resolve(`Mission completed successfully! You have been rewarded with 1 minipoint.`);
