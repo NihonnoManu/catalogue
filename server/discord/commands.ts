@@ -871,11 +871,9 @@ export async function completeMission(userId: number): Promise<string> {
 
     if (!activeMission || activeMission.isCompleted) {
       message = 'You have no active mission to complete or it has already been completed.';
-      console.log("Active mission:" + activeMission + " isCompleted: " + activeMission?.isCompleted);
       return message;
     }
 
-    console.log("HOLA");
     // Notify the other user about the mission completion
 
     const allUsers = await storage.getAllUsers();
@@ -902,8 +900,7 @@ export async function completeMission(userId: number): Promise<string> {
  * @param userId - The ID of the user who is completing or failing the mission
  * @param complete - Whether the other user accepts or fails the mission completion
  * */
-function handleMissionCompletion(userId: number, complete: boolean): Promise<string> {
-  return new Promise(async (resolve, reject) => {
+export async function handleMissionCompletion(userId: number, complete: boolean): Promise<string> {
     try {
     const allUsers = await storage.getAllUsers();
     const otherUser = allUsers.find(u => u.id !== userId);
@@ -924,9 +921,11 @@ function handleMissionCompletion(userId: number, complete: boolean): Promise<str
         )
       });
 
-      if (!activeMission) {
-        return reject('You have no active mission to complete or it has already been completed.');
-      }
+    if (!activeMission || activeMission.isCompleted) {
+      message = 'You have no active mission to complete or it has already been completed.';
+      console.log("Active mission:" + activeMission + " isCompleted: " + activeMission?.isCompleted);
+      return message;
+    }
 
       // Update the mission status based on the user's response
       if (complete) {
@@ -940,20 +939,21 @@ function handleMissionCompletion(userId: number, complete: boolean): Promise<str
           .set({ points: 1 })
           .where(eq(schema.rewards.userId));        
 
-        resolve(`Mission completed successfully! You have been rewarded with 1 minipoint.`);
+        message = "Mission completed successfully! You have been rewarded with 1 minipoint.";
+        return message
       } else {
         // Mark the mission as failed
         await db.update(schema.activeMissions)
           .set({ isCompleted: false, updatedAt: new Date() })
           .where(eq(schema.activeMissions.id, activeMission.id));
 
-        resolve(`Mission completion failed. You can try again later.`);
+        message = "Mission completion failed. You can try again later.";
+        return message
       }
     } catch (error) {
       console.error('Error handling mission completion:', error);
-      reject(`Failed to handle mission completion: ${error instanceof Error ? error.message : 'An error occurred'}`);
+      return "Failed to handle mission completion: ${error instanceof Error ? error.message : 'An error occurred'}";
     }
-  });
 }
 
 
