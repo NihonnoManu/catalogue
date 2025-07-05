@@ -608,7 +608,7 @@ async function handleSteal(userId: number): Promise<string> {
 
     // If the last steal transaction exists and was made less than 2 hours ago, return an error message 
     if (lastStealTransaction && new Date(lastStealTransaction.createdAt).getTime() > Date.now() - 2 * 60 * 60 * 1000) {
-      return 'You can only use this command once every 2 hours.';
+      return 'You can only use this command once every 4 hours.';
     }
     
     // Generate a random number to determine success (66% chance)
