@@ -877,10 +877,16 @@ export async function completeMission(userId: number): Promise<string> {
     // Notify the other user about the mission completion
 
     const allUsers = await storage.getAllUsers();
+    const user = await storage.getUserById(userId);
     const otherUser = allUsers.find(u => u.id !== userId);
+
+      // Obtener los detalles de la misión usando el `mission_id`
+      const mission = await db.query.missions.findFirst({
+        where: eq(schema.missions.id, activeMission.missionId),
+      });
     
     if (otherUser) {
-      message = `**Mission Completed!**\n${otherUser.displayName}, ${activeMission.userId.display_name} has completed their mission: **${activeMission.description}**. Please use !complete or !fail to respond to the completion.`;
+      message = `**Mission Completed!**\n${otherUser.displayName},\n ${user.display_name} has completed their mission: \n**${mission.description}**.\n Please use !complete or !fail to respond to the completion.`;
       return message;
     } else {
       return 'Could not find the other user to notify about your mission completion.';
@@ -922,8 +928,7 @@ export async function handleMissionCompletion(userId: number, complete: boolean)
       });
 
     if (!activeMission || activeMission.isCompleted) {
-      message = 'You have no active mission to complete or it has already been completed.';
-      console.log("Active mission:" + activeMission + " isCompleted: " + activeMission?.isCompleted);
+      message = 'The other user has no active mission to complete or it has already been completed.';
       return message;
     }
 
