@@ -87,10 +87,12 @@ export async function handleCommand(commandText: string, user: User): Promise<st
         return await addMissionToPool(user.id, missionName, description);
       
       case '!mission':
+      case '!mision':
         // Get the active mission for the user
         return await getActiveMissionForUser(user.id);
 
       case '!completemission':
+      case '!report':
         // Complete the mission for the user
         return await completeMission(user.id);
       
@@ -939,10 +941,29 @@ export async function handleMissionCompletion(userId: number, complete: boolean)
           .set({ isCompleted: true, updatedAt: new Date() })
           .where(eq(schema.activeMissions.id, activeMission.id));
 
-        // Reward the user by updating the rewards table, adding 1 minipoint to the existing value. 
-        await db.update(schema.rewards)
-          .set({ points: 1 })
-          .where(eq(schema.rewards.userId));        
+
+        
+        const allUsers = await storage.getAllUsers();
+        const otherUser = allUsers.find(u => u.id !== userId);
+        //Check the current rewards points of the user and add the reward of the mission
+        const currentReward = await db.query.rewards.findFirst({
+          where: eq(schema.rewards.userId, otherUser.id)
+        });
+
+        if (currentReward) {
+          // Update the existing reward points
+          await db.update(schema.rewards)
+            .set({ points: currentReward.points + 1, updatedAt: new Date() })
+            .where(eq(schema.rewards.userId, otherUser.id));
+        } else {
+          // Create a new reward entry for the user
+          await db.insert(schema.rewards).values({
+            userId: otherUser.id,
+            points: 1,
+            updatedAt: new Date()
+          });
+        }
+          
 
         message = "Mission completed successfully! You have been rewarded with 1 minipoint.";
         return message
