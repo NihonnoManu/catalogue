@@ -927,7 +927,7 @@ function handleMissionCompletion(userId: number, complete: boolean): Promise<str
       if (complete) {
         // Mark the mission as completed
         await db.update(schema.activeMissions)
-          .set({ isCompleted: true }).set({ updatedAt: new Date() })
+          .set({ isCompleted: true, updatedAt: new Date() })
           .where(eq(schema.activeMissions.id, activeMission.id));
 
         // Reward the user by updating the rewards table, adding 1 minipoint to the existing value. 
@@ -939,7 +939,7 @@ function handleMissionCompletion(userId: number, complete: boolean): Promise<str
       } else {
         // Mark the mission as failed
         await db.update(schema.activeMissions)
-          .set({ isCompleted: false }).set({ updatedAt: new Date() })
+          .set({ isCompleted: false, updatedAt: new Date() })
           .where(eq(schema.activeMissions.id, activeMission.id));
 
         resolve(`Mission completion failed. You can try again later.`);
