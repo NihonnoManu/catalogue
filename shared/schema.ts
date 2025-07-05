@@ -139,3 +139,12 @@ export const activeMissions = pgTable("active_missions", {
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+// Discount schema: A table to keep track of points that a user has accumulated
+export const discounts = pgTable("discounts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  points: integer("points").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+

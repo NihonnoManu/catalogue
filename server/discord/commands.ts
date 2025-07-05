@@ -2,7 +2,7 @@ import { MessageCreateOptions } from 'discord.js';
 import { storage } from '../storage';
 import { User, CatalogItem } from '@shared/schema';
 import { db } from '@db';
-import { eq, or, desc, and } from 'drizzle-orm';
+import { eq, or, desc, and, gte, lt } from 'drizzle-orm';
 import * as schema from '@shared/schema';
 import { BargainOffer } from '../routes';
 import { Mission } from '../missions';
@@ -86,6 +86,10 @@ export async function handleCommand(commandText: string, user: User): Promise<st
 
         return await addMissionToPool(user.id, missionName, description);
       
+      case '!mission':
+        // Get the active mission for the user
+        return await getActiveMissionForUser(user.id);
+        
       default:
         return `Unknown command: ${command}. Try !help for a list of commands.`;
     }
@@ -772,7 +776,51 @@ export async function assignRandomMissionToUser(userId: number): Promise<string>
   }
 }
 
-assignRandomMissionToUser(2);
+
+/* Daily assign a random mission to both users. The way it's going to work is that each user will check if they have an active mission assigned to them for today,
+* if not, they will be automatically assigned one through assignRandomMissionToUser(userId: number) function, which will select a random mission from the pool.
+* if the user already has an active mission assigned to them, they will not be assigned a new one until next day.
+* This function will show the assigned mission to the user and it's status (completed or not) when they type !mission command.
+* The user can complete the mission by typing !completemission [missionId] command.
+*/
+export async function getActiveMissionForUser(userId: number): Promise<string> {
+  try {
+    // Get the active mission for the user, checking if there is an active mission assigned to them for today's date.
+    // This will return the first active mission for the user, including the mission details.
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    let message
+
+    const activeMission = await db.query.activeMissions.findFirst({
+      where: and(
+        eq(schema.activeMissions.userId, userId),
+        gte(schema.activeMissions.createdAt, today),
+        lt(schema.activeMissions.createdAt, tomorrow)
+      ),
+      with: {
+        mission: true // Include the mission details
+      }
+    });
+        
+    if (!activeMission) {
+      assignRandomMissionToUser(userId);
+      message = 'You had no active missions assigned for today. A new mission has been assigned to you. Use !mission to check it.';
+    }
+    
+    const mission = activeMission.mission;
+    
+    message = `**Active Mission**\nName: ${mission.name}\nDescription: ${mission.description}\nReward: ${mission.reward} MP of discount\nStatus: ${activeMission.isCompleted ? 'Completed' : 'In Progress'}`;
+    return message;
+  } catch (error) {
+    console.error('Error fetching active mission:', error);
+    return `Failed to fetch active mission: ${error instanceof Error ? error.message : 'An error occurred'}`;
+  }
+}
+
+
 
   
 
