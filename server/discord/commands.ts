@@ -5,13 +5,14 @@ import { db } from '@db';
 import { eq, or, desc, and } from 'drizzle-orm';
 import * as schema from '@shared/schema';
 import { BargainOffer } from '../routes';
+import { Mission } from '../missions';
 
 /**
  * Process a command and return the response
  */
 export async function handleCommand(commandText: string, user: User): Promise<string | MessageCreateOptions> {
   // Parse the command
-  const parts = commandText.trim().split(/\s+/);
+  const parts = commandText.trim().split(/\s+/);  // Split by whitespace
   const command = parts[0].toLowerCase();
 
   try {
@@ -67,7 +68,23 @@ export async function handleCommand(commandText: string, user: User): Promise<st
 
       case '!teodio':
       case 'teodio':
-	return await getTeOdioMessage(user);
+      	return await getTeOdioMessage(user);
+      
+      
+      case '!addmission':
+        //Split the command text to get the mission name and description by " - "
+        const  missionToAdd = commandText.trim().split(' - '); // Split by " - "
+        if (missionToAdd.length < 3) {
+          return 'Please provide a valid description (e.g., !addmission - Hola - Di hola)';
+        }
+        const missionName = missionToAdd[1];
+        const description = missionToAdd[2];
+        // Check if description is empty or not
+        if (!missionName || !description) {
+          return 'Please provide a valid description (e.g., !addmission - Hola - Di hola)';
+        }
+
+        return await addMissionToPool(user.id, missionName, description);
       
       default:
         return `Unknown command: ${command}. Try !help for a list of commands.`;
@@ -654,3 +671,67 @@ async function handleSteal(userId: number): Promise<string> {
     return `Failed to steal points: ${error instanceof Error ? error.message : 'An error occurred'}`;
   }
 }
+
+
+
+
+
+
+
+
+/*
+*APARTADO PARA LAS MISIONES.
+*/
+
+
+/*
+Sería tener un pool de misiones aleatorias, de las cuales una se asigna diariamente a cada usuario, se le comunicaría a ese usuario de manera secreta, 
+al completarse una misión se consigue un descuento de 1 minipunto en la siguiente compra. 
+Si ambos consiguen completar la misión dicho descuento se anula. Cuando un jugador consigue completar su misión esta se anuncia como completada. 
+*/
+// Function to create a new mission
+export async function createMission(mission: Mission): Promise<Mission> {
+  const { id, name, description, reward } = mission;
+
+  // Insert the mission into the database
+  const result = await db.insert(schema.missions).values({
+    id,
+    name,
+    description,
+    reward
+  }).returning();
+
+  // Return the newly created mission
+  return result[0];
+}
+
+function addMissionToPool(userId: number, missionName: string, description: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // Check if the user exists
+    storage.getUserById(userId)
+      .then(user => {
+        if (!user) {
+          return reject('User not found');
+        }
+
+        // Create a new mission
+        const newMission: Mission = {
+          id: Date.now(), // Simple ID generation, could be improved
+          name: missionName,
+          description,
+          reward: 1 // Default reward for completing a mission
+        };
+
+        // Add the mission to the pool (this would typically involve saving to a database)
+        createMission(newMission)
+          .then(mission => resolve(`Mission "${mission.name}" added successfully!`))
+          .catch(err => reject(`Failed to add mission: ${err}`));
+      })
+      .catch(err => reject(`Error fetching user: ${err}`));
+  });
+}
+
+
+
+  
+

@@ -121,3 +121,19 @@ export const bargainSchema = z.object({
 
 export type BargainRequest = z.infer<typeof bargainSchema>;
 
+// Mission pool schema
+export const missions = pgTable("missions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  reward: integer("reward").notNull().default(0),
+});
+
+// Active missions schema
+export const activeMissions = pgTable("active_missions", {
+  userId: integer("user_id").references(() => users.id).notNull(),
+  missionId: integer("mission_id").references(() => missions.id).notNull(),
+  isCompleted: boolean("is_completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
