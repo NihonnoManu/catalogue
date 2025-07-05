@@ -871,9 +871,11 @@ export async function completeMission(userId: number): Promise<string> {
 
     if (!activeMission || activeMission.isCompleted) {
       message = 'You have no active mission to complete or it has already been completed.';
+      console.log("Active mission:" + activeMission + " isCompleted: " + activeMission?.isCompleted);
       return message;
     }
 
+    console.log("HOLA");
     // Notify the other user about the mission completion
 
     const allUsers = await storage.getAllUsers();
