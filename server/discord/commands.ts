@@ -869,8 +869,9 @@ export async function completeMission(userId: number): Promise<string> {
       )
     });
 
-    if (!activeMission) {
-      return 'You have no active mission to complete or it has already been completed.';
+    if (!activeMission || activeMission.isCompleted) {
+      message = 'You have no active mission to complete or it has already been completed.';
+      return message;
     }
 
     // Notify the other user about the mission completion
