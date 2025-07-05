@@ -730,7 +730,49 @@ function addMissionToPool(userId: number, missionName: string, description: stri
   });
 }
 
+/**
+ * Function to assign a random mission to a user from the pool of available missions.
+ * This function will be automatically called daily to assign a new mission to each user.
+ * @param userId - The ID of the user to whom the mission will be assigned
+ * @return A message indicating the assigned mission
+ * This function will also send a private message to the user with the details of the assigned mission.
+ * It will create a new entry in the active_missions table with isCompleted set to false.
+ * When the user completes the mission, they will call a command like !completemission [missionId] to mark it as completed.
+ * The function will then update the isCompleted field to true and send a message to the group so the other user is also notified.
+ */
+export async function assignRandomMissionToUser(userId: number): Promise<string> {
+  try {
+    // Get all available missions
+    const missions = await db.query.missions.findMany();
+    
+    if (missions.length === 0) {
+      return 'No missions available at the moment.';
+    }
+    
+    // Select a random mission
+    const randomMission = missions[Math.floor(Math.random() * missions.length)];
+    
+    // Create an entry in the active_missions table
+    await db.insert(schema.activeMissions).values({
+      userId,
+      missionId: randomMission.id,
+      isCompleted: false
+    });
+    
+    // Send a private message to the user with the mission details
+    const user = await storage.getUserById(userId);
+    if (user) {
+      return `You have been assigned a new mission: **${randomMission.name}**\nDescription: ${randomMission.description}\nReward: ${randomMission.reward} MP`;
+    } else {
+      return 'User not found';
+    }
+  } catch (error) {
+    console.error('Error assigning mission:', error);
+    return `Failed to assign mission: ${error instanceof Error ? error.message : 'An error occurred'}`;
+  }
+}
 
+assignRandomMissionToUser(2);
 
   
 

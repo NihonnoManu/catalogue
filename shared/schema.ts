@@ -131,9 +131,11 @@ export const missions = pgTable("missions", {
 
 // Active missions schema
 export const activeMissions = pgTable("active_missions", {
+  id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   missionId: integer("mission_id").references(() => missions.id).notNull(),
   isCompleted: boolean("is_completed").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
+
