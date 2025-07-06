@@ -132,8 +132,13 @@ function getHelpMessage(): string {
 \`!teodio\` - Show your hate randomly
 \`!robinhood\` - Steal half of the other user's points if they haven't made a transaction in the last 24 hours
 \`!steal\` - Try to steal a point from the other user with a 66% chance of success. If you fail, you will give a point to the other user instead. You can only use this command once every 2 hours.
+\`!mission\` - Get your active mission
+\`!report\` - Report your mission completion
+\`!complete\` - Complete the mission for the other user
+\`!fail\` - Fail the mission for the other user
 \`!help\` - Display this help message
 `;
+//\`!addmission - [mission name] - [description]\` - Add a new mission to the pool
 }
 
 /**
@@ -888,7 +893,7 @@ export async function completeMission(userId: number): Promise<string> {
       });
     
     if (otherUser) {
-      message = `**Mission Completed!**\n${otherUser.displayName}, ${user.displayName} has completed their mission: \n**${mission.name}**.\n ${mission.description}.\n Please use !complete or !fail to respond to the completion.`;
+      message = `**Mission Completed!**\n${otherUser.displayName}, ${user.displayName} has completed their mission: \n**${mission.name}**.\n ${mission.description}.\nPlease use !complete or !fail to respond to the completion.`;
       return message;
     } else {
       return 'Could not find the other user to notify about your mission completion.';
