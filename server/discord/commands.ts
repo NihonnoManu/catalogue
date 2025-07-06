@@ -965,7 +965,7 @@ export async function handleMissionCompletion(userId: number, complete: boolean)
         }
           
 
-        message = "Mission completed successfully! You have been rewarded with 1 minipoint.";
+        message = `Mission completed successfully! ${otherUser.displayName} have been rewarded with 1 minipoint.`;
         return message
       } else {
         // Mark the mission as failed
