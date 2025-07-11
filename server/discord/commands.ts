@@ -27,6 +27,8 @@ export async function handleCommand(commandText: string, user: User): Promise<st
       case '!hola':
         let greeting = `Hola ${otherUser.displayName}, ¿cómo estás?`;
         return {content: greeting,broadcast: true};
+      case '!rodillas':
+        return {content: `${otherUser.displayName}, podrías ponerte de rodillas para ${user.displayName}`, broadcast: true};
       case '!help':
         return getHelpMessage();
       

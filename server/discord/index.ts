@@ -117,18 +117,18 @@ export async function setupDiscordBot() {
 			response +=`**${teodio[rdm]}**\n`;
 		  
 				
-        // Send the response back to Discord
+    // Send the response back to Discord
 		//console.log(response.length);
         if (response) {
-		if(response.length<2000){
-	          await message.reply(response);
-		}else{
-			let chunks = splitMessage(response)
-			for (let i = 0; i < chunks.length; i++){
-                                console.log(chunks[i]);
-                                await message.reply(chunks[i]);
-                        }
-		}
+          if(response.length<2000){
+                  await message.reply(response);
+          }else{
+            let chunks = splitMessage(response)
+            for (let i = 0; i < chunks.length; i++){
+              console.log(chunks[i]);
+              await message.reply(chunks[i]);
+            }
+          }
 
         }
       } catch (error) {
