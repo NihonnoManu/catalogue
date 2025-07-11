@@ -15,15 +15,18 @@ export async function handleCommand(commandText: string, user: User): Promise<st
   const parts = commandText.trim().split(/\s+/);  // Split by whitespace
   const command = parts[0].toLowerCase();
 
+  const allUsers = await storage.getAllUsers();
+  const otherUser = allUsers.find(u => u.id !== userId);
+  if (!otherUser) {
+    return 'Could not find another user to steal points from.';
+  }
+    
+
   try {
     switch (command) {
       case '!hola':
-        let greeting = `Hola ${user.displayName}, ¿cómo estás?`;
-        //Now i want to add a flag on the message to broadcast it to the channel
-        return {
-          content: greeting,
-          broadcast: true // This flag broadcasts the message to the channel
-        };
+        let greeting = `Hola ${otherUser.displayName}, ¿cómo estás?`;
+        return {content: greeting,broadcast: true};
       case '!help':
         return getHelpMessage();
       
@@ -517,7 +520,7 @@ async function getTeOdioMessage(user): Promise<string> {
  * @param userId - The ID of the user who is trying to steal points
  * @return A message indicating the result of the operation
  * */
-async function handleRobinHood(userId: number): Promise<string> {
+async function handleRobinHood(userId: number): Promise<string | MessageCreateOptions> {
   try {
     // Get the user who is trying to steal points
     const user = await storage.getUserById(userId);
@@ -577,7 +580,7 @@ async function handleRobinHood(userId: number): Promise<string> {
     let message = '**Robin hood has made an appearance!**\n\n';
     message += `${amountToSteal} MP has been stolen from ${otherUser.displayName}\n\n`;
     
-    return message;
+    return {content: message, broadcast: true};
   } catch (error) {
     console.error('Transaction error:', error);
     return `Failed to get transaction history: ${error instanceof Error ? error.message : 'An error occurred'}`;
@@ -594,7 +597,7 @@ async function handleRobinHood(userId: number): Promise<string> {
  * @param userId - The ID of the user who is trying to steal points
  * @return A message indicating the result of the operation.
  * */
-async function handleSteal(userId: number): Promise<string> {
+async function handleSteal(userId: number): Promise<string | MessageCreateOptions> {
   try {
     // Get the user who is trying to steal points
     const user = await storage.getUserById(userId);
@@ -660,7 +663,7 @@ async function handleSteal(userId: number): Promise<string> {
       message += `${amountToSteal} MP has been stolen from ${otherUser.displayName}\n\n`;
 
 
-      return message;
+    return {content: message, broadcast: true};
 
     } else {
       // Give a point to the other user instead
@@ -693,7 +696,8 @@ async function handleSteal(userId: number): Promise<string> {
       let message = '**You failed to steal a point!**\n\n';
       message += `You gave ${amountToSteal} MP to ${otherUser.displayName}\n\n`;
       
-      return message;
+    return {content: message, broadcast: true};
+      
     }
   }
   catch (error) {

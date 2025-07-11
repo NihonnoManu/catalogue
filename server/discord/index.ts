@@ -66,7 +66,7 @@ export async function setupDiscordBot() {
           console.log(response);
 
           if (response.broadcast) {
-            const maintenanceChannel = client.channels.cache.get('1391059575826022592');
+            const maintenanceChannel = client.channels.cache.get('1367608781659439236');
             if (maintenanceChannel && maintenanceChannel.isTextBased()) {
               await maintenanceChannel.send(response.content);
               }
