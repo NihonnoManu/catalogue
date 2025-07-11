@@ -868,7 +868,7 @@ export async function getActiveMissionForUser(userId: number): Promise<string> {
 * If the other user rejects the mission completion, it won't be marked as completed and the user will need to try again.
 * @param userId - The ID of the user who is completing the mission
 * */
-export async function completeMission(userId: number): Promise<string> {
+export async function completeMission(userId: number): Promise<string | MessageCreateOptions> {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -904,8 +904,8 @@ export async function completeMission(userId: number): Promise<string> {
       });
     
     if (otherUser) {
-      message = `**Mission Completed!**\n${otherUser.displayName}, ${user.displayName} has completed their mission: \n**${mission.name}**.\n ${mission.description}.\nPlease use !complete or !fail to respond to the completion.`;
-      return message;
+      message = `**Mission Completed!**\n${otherUser.displayName}, ${user.displayName} has completed their mission: \n**${mission.name}**.\n ${mission.description}.\n\nPlease use !complete or !fail to respond to the completion.`;   
+      return {content: message, broadcast: true};
     } else {
       return 'Could not find the other user to notify about your mission completion.';
     }
