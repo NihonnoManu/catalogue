@@ -29,6 +29,7 @@ export async function setupDiscordBot() {
     // Ignore messages from bots to prevent loops
     if (message.author.bot) return;
 
+    console.log(message);
 
 	let lowercase = message.content.toLowerCase();
 	
@@ -45,23 +46,42 @@ export async function setupDiscordBot() {
           await message.reply("You don't seem to be registered in our system. Please contact an administrator.");
           return;
         }
-        
-        // Process the command
-        const response = await handleCommand(message.content, user);
-        
-        // Send the response back to Discord
-	console.log(response.length);
-        if (response) {
-		if(response.length<2000){
-	          await message.reply(response);
-		}else{
-			let chunks = splitMessage(response)
-			for (let i = 0; i < chunks.length; i++){
-                                console.log(chunks[i]);
-                                await message.reply(chunks[i]);
-                        }
-		}
 
+                
+        // If the message was !maintenance, send a maintenance message to the channel with id 
+        // 1367608781659439236 (Hogwarts)
+        // 1391059575826022592 (Slytherin)
+
+        if (message.content === '!maintenance') {
+          const maintenanceChannel = client.channels.cache.get('1367608781659439236');
+          if (maintenanceChannel && maintenanceChannel.isTextBased()) {
+            await maintenanceChannel.send('The server is currently under maintenance. Please check back later.');
+          }
+          return;
+        }else{
+
+        // Process the command
+          const response = await handleCommand(message.content, user);
+
+          if (response.broadcast) {
+            const maintenanceChannel = client.channels.cache.get('1391059575826022592');
+          if (maintenanceChannel && maintenanceChannel.isTextBased()) {
+            await maintenanceChannel.send('The server is currently under maintenance. Please check back later.');
+          }
+          
+          // Send the response back to Discord
+          if (response) {
+            if(response.length<2000){
+                    await message.reply(response);
+            }else{
+              let chunks = splitMessage(response)
+              for (let i = 0; i < chunks.length; i++){
+                console.log(chunks[i]);
+                await message.reply(chunks[i]);
+              }
+            }
+
+          }
         }
       } catch (error) {
         console.error('Error handling command:', error);
