@@ -527,7 +527,7 @@ async function getHolaMessage(userId: number): Promise<string | MessageCreateOpt
   let rdm = Math.floor(Math.random() * (hola.length - 0 + 1) + 0);
   //let rdm = Math.floor(Math.random() * (5 - 0 + 1) + 0);
  
-  message +=`**${hola[rdm]}**\n`;
+  message +=`${hola[rdm]}`;
 
 return {content: message,broadcast: true};
 }
