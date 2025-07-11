@@ -61,12 +61,15 @@ export async function setupDiscordBot() {
         }else{
 
         // Process the command
-          const response = await handleCommand(message.content, user);
+          let response = await handleCommand(message.content, user);
 
           if (response.broadcast) {
             const maintenanceChannel = client.channels.cache.get('1391059575826022592');
-          if (maintenanceChannel && maintenanceChannel.isTextBased()) {
-            await maintenanceChannel.send('The server is currently under maintenance. Please check back later.');
+            if (maintenanceChannel && maintenanceChannel.isTextBased()) {
+              await maintenanceChannel.send('The server is currently under maintenance. Please check back later.');
+              }
+          }else{
+            response = response.content;
           }
           
           // Send the response back to Discord
