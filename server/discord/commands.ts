@@ -17,7 +17,7 @@ export async function handleCommand(commandText: string, user: User): Promise<st
 
   try {
     switch (command) {
-      case 'hola':
+      case '!hola':
         let greeting = `Hola ${user.displayName}, ¿cómo estás?`;
         //Now i want to add a flag on the message to broadcast it to the channel
         return {

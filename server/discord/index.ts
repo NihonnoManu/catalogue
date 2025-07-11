@@ -29,7 +29,7 @@ export async function setupDiscordBot() {
     // Ignore messages from bots to prevent loops
     if (message.author.bot) return;
 
-    console.log(message);
+  //console.log(message);
 
 	let lowercase = message.content.toLowerCase();
 	
