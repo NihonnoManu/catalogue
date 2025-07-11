@@ -663,7 +663,7 @@ async function handleSteal(userId: number): Promise<string | MessageCreateOption
       message += `${amountToSteal} MP has been stolen from ${otherUser.displayName}\n\n`;
 
 
-    return {content: message, broadcast: true};
+    return message;
 
     } else {
       // Give a point to the other user instead
