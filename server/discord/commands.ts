@@ -16,7 +16,7 @@ export async function handleCommand(commandText: string, user: User): Promise<st
   const command = parts[0].toLowerCase();
 
   const allUsers = await storage.getAllUsers();
-  const otherUser = allUsers.find(u => u.id !== userId);
+  const otherUser = allUsers.find(u => u.id !== user.id);
   if (!otherUser) {
     return 'Could not find another user to steal points from.';
   }
