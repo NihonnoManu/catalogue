@@ -24,21 +24,16 @@ export async function handleCommand(commandText: string, user: User): Promise<st
 
   try {
     switch (command) {
-      case '!hola':
-        let greeting = `Hola ${otherUser.displayName}, ¿cómo estás?`;
-        return {content: greeting,broadcast: true};
+      case '!hola':         return getHolaMessage(user.id);
       case '!rodillas':
         return {content: `Por favor, ${otherUser.displayName}, ¿podrías ponerte de rodillas para ${user.displayName}?`, broadcast: true};
-      case '!help':
-        return getHelpMessage();
+      case '!help':         return getHelpMessage();
       
-      case '!balance':
-        return getBalanceMessage(user);
+      case '!balance':      return getBalanceMessage(user);
       
       case '!catalogue':
       case '!catalog':
-      case '!catalogo':
-        return await getCatalogueMessage();
+      case '!catalogo':     return await getCatalogueMessage();
       
       case '!buy':
         if (parts.length < 2) {
@@ -46,8 +41,7 @@ export async function handleCommand(commandText: string, user: User): Promise<st
         }
         return await handlePurchase(user.id, parts[1]);
       
-      case '!transactions':
-        return await getTransactionsMessage(user.id);
+      case '!transactions': return await getTransactionsMessage(user.id);
         
       case '!bargain':
         if (parts.length < 3) {
@@ -60,27 +54,20 @@ export async function handleCommand(commandText: string, user: User): Promise<st
         }
         return await handleBargain(user.id, itemSlug, offeredPrice);
         
-      case '!accept':
-        return await handleBargainResponse(user.id, true);
+      case '!accept':       return await handleBargainResponse(user.id, true);
         
-      case '!reject':
-        return await handleBargainResponse(user.id, false);
+      case '!reject':       return await handleBargainResponse(user.id, false);
         
-      case '!all-in':
-        return await handleAllIn(user.id);
+      case '!all-in':       return await handleAllIn(user.id);
 
-      case '!rules':
-        return await getRulesMessage();
+      case '!rules':        return await getRulesMessage();
         
-      case '!robinhood':
-        return await handleRobinHood(user.id);
+      case '!robinhood':    return await handleRobinHood(user.id);
 
-      case '!steal':
-        return await handleSteal(user.id);
+      case '!steal':        return await handleSteal(user.id);
 
       case '!teodio':
-      case 'teodio':
-      	return await getTeOdioMessage(user);
+      case 'teodio':        return await getTeOdioMessage(user);
       
       
       case '!addmission':
@@ -506,14 +493,46 @@ async function getTeOdioMessage(user): Promise<string> {
     message +=`**¿Un ratito más?**\n`;
   else
     message +=`**${teodio[rdm]}**\n`;
-  
-//  rules.forEach(rule => {
-//   message += `**${rule.name}**\n`;
-//    message += `${rule.description}\n`;
-//  });
 
   return message;
 }
+
+/**
+ * Generate hola message
+ */
+
+
+async function getHolaMessage(userId: number): Promise<string | MessageCreateOptions> {
+  
+  // Get the user who is trying to steal points
+  const user = await storage.getUserById(userId);
+  if (!user) {
+    return 'User not found';
+  }
+  
+  // Get the other user (the one from whom points will be stolen)
+  const allUsers = await storage.getAllUsers();
+  const otherUser = allUsers.find(u => u.id !== userId);
+  if (!otherUser) {
+    return 'Could not find another user to steal points from.';
+  }
+
+  let message = '';
+  let hola = [`Hola ${otherUser.displayName}, ¿cómo estás?`,
+    `Hi ${otherUser.displayName}, ¿fancy a dance?`,
+    `Hola ${otherUser.displayName}, ${user.displayName} te saluda.`,
+    `${otherUser.displayName}, ${user.displayName} te manda recuerdos.`,
+    `${otherUser.displayName}, ¿qué haces?`]
+    
+  let rdm = Math.floor(Math.random() * (hola.length - 0 + 1) + 0);
+  //let rdm = Math.floor(Math.random() * (5 - 0 + 1) + 0);
+ 
+  message +=`**${hola[rdm]}**\n`;
+
+return {content: message,broadcast: true};
+}
+
+
 
 /**
  * Create a function to steal half of the other user's points in case of not having done a transaction in the last 24 hours.
